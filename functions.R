@@ -1,4 +1,4 @@
-# append senator main df
+# append senator speeches to main df
 append_df <- function(sen, speeches_df){
   # rename and filter columns
   sen <- sen %>% 
