@@ -14,8 +14,3 @@ append_df <- function(sen, speeches_df){
   
      return(sen_df)
 }
-
-
-
-
-senators <- append_df(sen = sen, speeches_df = speeches_df)
