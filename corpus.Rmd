@@ -13,13 +13,14 @@ library(quanteda)
 library(readtext)
 ```
 
+Download senator tables from https://www12.senado.leg.br/dados-abertos and create data frame. 
 
 ```{r}
-# Create empty dataframe
+# Create empty data frame
 sen_df <- data.frame()
 
-# Download senator dataframe and bind to `sen_df`
-for(i in 1:80){
+# Download senator data frame and bind to `sen_df`
+for (i in 1:80) {
   try({
   endpoint <- glue(paste0("https://legis.senado.leg.br/dadosabertos/senador/",    senators$id[i], "/discursos"))
   
@@ -36,17 +37,18 @@ for(i in 1:80){
   
   df$Nome <- paste(senators$name_senator[i])
   
-  sen_df <-rbind(sen_df,df)
-  }, silent=FALSE)
-  }
+  sen_df <- rbind(sen_df,df)
+  }, silent = FALSE)}
+  
 
 # Reorder columns
 sen_df <- sen_df[c(6, 7, 1, 2, 3, 4, 5)]
 
 # Save
-save(sen_df,file="sen_df.Rda")
+save(sen_df,file = "sen_df.Rda")
 ```
 
+Create data frame with senators speeches. 
 
 ```{r}
 # Create Path
@@ -65,11 +67,10 @@ speeches_df <- speeches_df %>%
   select(CodigoPronunciamento, Pronunciamento)
 
 # Save
-save(speeches_df, file="speeches_df.Rda")
+save(speeches_df, file = "speeches_df.Rda")
 ```
 
-
-Here we go from 17544 observations to 15588 because 1956 of the speech files downloaded were empty. We remove them from the final dataframe. 
+Merge the two data frames and remove empty rows. Here we go from 17544 observations to 15588 because 1956 of the speech files downloaded were empty. 
 
 ```{r}
 # Merge `sen_df` and `speeches_df` and omit empty rows
@@ -78,31 +79,32 @@ sen_corpus_df <- merge(sen_df, speeches_df, by = "CodigoPronunciamento") %>%
   na.omit 
 
 # Save corpus dataframe
-save(sen_corpus_df, file="sen_corpus_df.Rda")
+save(sen_corpus_df, file = "sen_corpus_df.Rda")
 ```
 
 
 ```{r}
 # Create corpus
-sen_corpus <- corpus(sen_corpus_df, docid_field = "CodigoPronunciamento", 
+sen_corpus <- corpus(sen_corpus_dftrim, docid_field = "CodigoPronunciamento", 
                      text_field = "Pronunciamento")
 # Save
-save(sen_corpus, file="sen_corpus.Rda")
+save(sen_corpus, file = "sen_corpus.Rda")
 ```
 
+DFM groupped by senator name (`Nome`).
 
 ```{r}
 # DFM 
 sen_dfm <- dfm(sen_corpus,
   toLower = TRUE,
   remove_punct = TRUE,
-  remove = stopwords("portugues"),
+  remove = stopwords("portuguese"),
   remove_numbers = TRUE,
   removeSeparators = TRUE,
   remove_symbols = TRUE,
   stem = FALSE,  groups = "Nome")
 
 # Save
-save(sen_dfm, file="sen_dfm.Rda")
+save(sen_dfm, file = "sen_dfm.Rda")
 ```
 
