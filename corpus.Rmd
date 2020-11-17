@@ -1,0 +1,83 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(rvest)
+library(httr)
+library(jsonlite)
+library(plyr)
+library(readr)
+library(quanteda)
+library(readtext)
+```
+
+
+```{r}
+# Create empty dataframe
+sen_df <- data.frame()
+
+# Download senator dataframe and bind to `sen_df`
+for(i in 1:80){
+  try({
+  endpoint <- glue(paste0("https://legis.senado.leg.br/dadosabertos/senador/",    senators$id[i], "/discursos"))
+  
+  raw_json <- GET(endpoint, add_headers("Accept:application/json"))
+  parsed_json <- fromJSON(content(raw_json, "text"), flatten = TRUE)
+  str(parsed_json)
+  
+  df <- parsed_json$DiscursosParlamentar$Parlamentar$Pronunciamentos$Pronunciamento
+  
+  df <- df %>% 
+    dplyr::select(CodigoPronunciamento, DataPronunciamento, SiglaPartidoParlamentarNaData,                    UfParlamentarNaData, SessaoPlenaria.NumeroSessao)
+  
+  df$Id <- paste(senators$id[i])
+  
+  df$Nome <- paste(senators$name_senator[i])
+  
+  sen_df <-rbind(sen_df,df)
+  }, silent=FALSE)
+  }
+
+# Reorder columns
+sen_df <- sen_df[c(6, 7, 1, 2, 3, 4, 5)]
+
+# Save
+save(sen_df,file="sen_df.Rda")
+```
+
+
+```{r}
+# Create Path
+pdf_path <- "C:\\Users\\carol\\Desktop\\Fall_2020\\TADA\\Senado\\Web"
+
+# List PDFs 
+pdfs <- list.files(path = pdf_path, pattern = "*.pdf", full.names = TRUE) 
+
+# Create dataframe
+speeches_df <- readtext(pdfs,
+                        docvarsfrom = "filenames", verbosity = TRUE)
+
+# Rename and select relevant columns
+speeches_df <- speeches_df %>% 
+  dplyr::rename(CodigoPronunciamento = docvar1, Pronunciamento = text) %>% 
+  select(CodigoPronunciamento, Pronunciamento)
+
+# Save
+save(speeches_df, file="speeches_df.Rda")
+```
+
+
+Here we go from 17544 observations to 15588 because 1956 of the speech files downloaded were empty. We remove them from the final dataframe. 
+
+```{r}
+# Merge `sen_df` and `speeches_df` and omit empty rows
+sen_corpus_df <- merge(sen_df, speeches_df, by = "CodigoPronunciamento") %>% 
+  na_if("") %>%
+  na.omit 
+
+# Save corpus dataframe
+save(sen_corpus_df, file="sen_corpus_df.Rda")
+```
+
