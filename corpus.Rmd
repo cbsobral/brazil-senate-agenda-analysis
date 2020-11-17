@@ -81,3 +81,11 @@ sen_corpus_df <- merge(sen_df, speeches_df, by = "CodigoPronunciamento") %>%
 save(sen_corpus_df, file="sen_corpus_df.Rda")
 ```
 
+```{r}
+# Create corpus
+sen_corpus <- corpus(sen_corpus_df, docid_field = "CodigoPronunciamento", 
+                     text_field = "Pronunciamento")
+# Savel
+save(sen_corpus, file="sen_corpus.Rda")
+```
+
