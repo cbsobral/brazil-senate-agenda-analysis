@@ -81,11 +81,28 @@ sen_corpus_df <- merge(sen_df, speeches_df, by = "CodigoPronunciamento") %>%
 save(sen_corpus_df, file="sen_corpus_df.Rda")
 ```
 
+
 ```{r}
 # Create corpus
 sen_corpus <- corpus(sen_corpus_df, docid_field = "CodigoPronunciamento", 
                      text_field = "Pronunciamento")
-# Savel
+# Save
 save(sen_corpus, file="sen_corpus.Rda")
+```
+
+
+```{r}
+# DFM 
+sen_dfm <- dfm(sen_corpus,
+  toLower = TRUE,
+  remove_punct = TRUE,
+  remove = stopwords("portugues"),
+  remove_numbers = TRUE,
+  removeSeparators = TRUE,
+  remove_symbols = TRUE,
+  stem = FALSE,  groups = "Nome")
+
+# Save
+save(sen_dfm, file="sen_dfm.Rda")
 ```
 
