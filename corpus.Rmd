@@ -57,7 +57,7 @@ pdf_path <- "C:\\Users\\carol\\Desktop\\Fall_2020\\TADA\\Senado\\Web"
 # List PDFs 
 pdfs <- list.files(path = pdf_path, pattern = "*.pdf", full.names = TRUE) 
 
-# Create dataframe
+# Create data frame
 speeches_df <- readtext(pdfs,
                         docvarsfrom = "filenames", verbosity = TRUE)
 
@@ -78,7 +78,7 @@ sen_corpus_df <- merge(sen_df, speeches_df, by = "CodigoPronunciamento") %>%
   na_if("") %>%
   na.omit 
 
-# Save corpus dataframe
+# Save corpus data frame
 save(sen_corpus_df, file = "sen_corpus_df.Rda")
 ```
 
@@ -91,7 +91,7 @@ sen_corpus <- corpus(sen_corpus_dftrim, docid_field = "CodigoPronunciamento",
 save(sen_corpus, file = "sen_corpus.Rda")
 ```
 
-DFM groupped by senator name (`Nome`).
+DFM grouped by senator name (`Nome`).
 
 ```{r}
 # DFM 
