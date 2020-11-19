@@ -1,6 +1,9 @@
 ---
-title: "Untitled"
-output: html_document
+title: "Senado"
+output: 
+  html_document: 
+    theme: journal
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -20,7 +23,13 @@ library(topicmodels)
 # Pre-process
 
 ```{r}
-sen_corpus_df <- sen_corpus_df %>%  # or sen_corpus_lemma
+# Use sen_corpus_lemma
+load("C:/Users/carol/Desktop/Fall_2020/TADA/Senado/sen_corpus_lemma.Rda")
+
+# Rename
+sen_corpus_df <- sen_corpus_lemma
+
+sen_corpus_df <- sen_corpus_df %>%  
   filter(DataPronunciamento >= 2019-01-01)
 
 sen_corpus_df  <- sen_corpus_df %>% 
@@ -32,9 +41,18 @@ sen_corpus_df <- sen_corpus_df %>%
 ```
 
 ```{r}
+partidos <- sen_corpus_df %>% 
+  group_by(Partido) %>% 
+  count()
+
+partidos
+```
+
+```{r}
 sen_corpus <- corpus(sen_corpus_df, docid_field = "CodigoPronunciamento", 
                      text_field = "PronunciamentoLemma")
 ```
+
 
 ```{r warning=FALSE}
 sen_dfm <- dfm(sen_corpus,
@@ -58,18 +76,18 @@ sen_dfm <- dfm_select(sen_dfm, min_nchar = 2)
 docnames(sen_dfm) <- paste(sen_dfm$Nome, sen_dfm$Partido, sep = " ")
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 sen_dfm_idf <- dfm_tfidf(sen_dfm)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 textstat_frequency(sen_dfm, force = TRUE)
 ```
 
 
 # STM
 
-```{r}
+```{r message=FALSE, warning=FALSE, results='hide'}
 sen_dfm_stm <- asSTMCorpus(sen_dfm)
 
 stm_model <- stm(sen_dfm_stm$documents, sen_dfm_stm$vocab, 10, data = sen_dfm_stm$data, seed = 123)
@@ -77,7 +95,7 @@ stm_model <- stm(sen_dfm_stm$documents, sen_dfm_stm$vocab, 10, data = sen_dfm_st
 
 ```{r}
 words_stm <- as.data.frame(t(labelTopics(stm_model, n = 10)$frex))
-words_stm
+labelTopics(stm_model, n = 10)
 ```
  
 ```{r}
@@ -91,13 +109,13 @@ plot(
 ```
 
 ```{r message=FALSE, warning=FALSE}
-stm::cloud(stm_model,topic = 4, scale = c(2.25, .5))
+stm::cloud(stm_model,topic = 3, scale = c(2.25, .5))
 ```
 
 ```{r}
 plot(stm_model,
      type = "perspectives",
-     topics = c(1, 5),
+     topics = c(4, 5),
      main = "Putting two different topics in perspective")
 ```
 
@@ -105,20 +123,20 @@ plot(stm_model,
 # Wordfish 
 
 ```{r}
-mod1 <- textmodel_wordfish(sen_dfm, dir = c(56, 23), sparse = TRUE, seed = 123)
+wf <- textmodel_wordfish(sen_dfm, dir = c(99, 93), sparse = TRUE)
 ```
 
-
 ```{r}
-textplot_scale1d(mod1)
-textplot_scale1d(mod1, margin = c("documents", "features"), groups = sen_dfm$Partido)
+textplot_scale1d(wf)
+textplot_scale1d(wf, margin = "documents", groups = sen_dfm$Partido)
+textplot_scale1d(wf, margin = "documents", groups = sen_dfm$UfParlamentarNaData)
 ```
 
 
 # Keyness
 
 ```{r}
-textstat_keyness(sen_dfm, "Flavio Bolsonaro PSL")
+head(textstat_keyness(sen_dfm, "Flavio Bolsonaro PSL"))
 ```
 
 
@@ -138,8 +156,6 @@ top_terms <- topics %>%
   ungroup() %>%
   arrange(topic, -beta) %>% 
   arrange(desc(beta))
-
-top_terms
 ```
 
 
