@@ -80,13 +80,30 @@ sen_corpus_df <- merge(sen_df, speeches_df, by = "CodigoPronunciamento") %>%
 
 # Save corpus data frame
 save(sen_corpus_df, file = "sen_corpus_df.Rda")
+
+# Import lemmatized speeches (from python-spacy)
+senado1 <- read_csv("C:/Users/carol/Desktop/senado1.csv")
+
+# Change columns names and select
+sen_corpus_lemma <- senado1
+sen_corpus_lemma  <- sen_corpus_lemma %>% 
+  rename(PronunciamentoLemma = clean) %>% 
+  select(CodigoPronunciamento, PronunciamentoLemma)
+
+# Merge with complete data frame 
+sen_corpus_lemma <- merge(sen_corpus_df, sen_corpus_lemma, by = "CodigoPronunciamento")
+
+# Select columns and save corpus_lemma data frame
+sen_corpus_lemma <- sen_corpus_lemma[c(-8)]
+save(sen_corpus_lemma, file = "sen_corpus_lemma.Rda")
 ```
 
 
 ```{r}
 # Create corpus
-sen_corpus <- corpus(sen_corpus_dftrim, docid_field = "CodigoPronunciamento", 
+sen_corpus <- corpus(sen_corpus_df, docid_field = "CodigoPronunciamento", 
                      text_field = "Pronunciamento")
+
 # Save
 save(sen_corpus, file = "sen_corpus.Rda")
 ```
