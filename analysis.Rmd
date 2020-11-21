@@ -23,34 +23,20 @@ library(topicmodels)
 # Pre-process
 
 ```{r}
-# Use sen_corpus_lemma
-load("C:/Users/carol/Desktop/Fall_2020/TADA/Senado/sen_corpus_lemma.Rda")
+# Load df or lemma
+load("C:/Users/carol/Desktop/Fall_2020/TADA/Senado/sen_corpus_df.Rda") 
 
-# Rename
-sen_corpus_df <- sen_corpus_lemma
+# Execute if using lemma
+#sen_corpus_df <- sen_corpus_lemma 
 
-sen_corpus_df <- sen_corpus_df %>%  
-  filter(DataPronunciamento >= 2019-01-01)
-
-sen_corpus_df  <- sen_corpus_df %>% 
-  rename(Partido = SiglaPartidoParlamentarNaData)
-
-sen_corpus_df <- sen_corpus_df %>% 
-  mutate(Partido = str_replace(Partido, "PODE\\b", "PODEMOS"))
-
+#sen_corpus_df  <- sen_corpus_df %>% 
+  #rename(Pronunciamento = PronunciamentoLemma)
 ```
 
-```{r}
-partidos <- sen_corpus_df %>% 
-  group_by(Partido) %>% 
-  count()
-
-partidos
-```
 
 ```{r}
 sen_corpus <- corpus(sen_corpus_df, docid_field = "CodigoPronunciamento", 
-                     text_field = "PronunciamentoLemma")
+                     text_field = "Pronunciamento")
 ```
 
 
@@ -62,7 +48,7 @@ sen_dfm <- dfm(sen_corpus,
   remove_numbers = TRUE,
   removeSeparators = TRUE,
   remove_symbols = TRUE,
-  stem = FALSE,  groups = c("Nome", "Partido"))
+  stem = FALSE,  groups = "Partido")
 
 
 stopwords1 <- c("presidente", "exa", "excelencia", "senhor", "aqui", "porque", "ser",
@@ -73,15 +59,15 @@ stopwords1 <- c("presidente", "exa", "excelencia", "senhor", "aqui", "porque", "
 
 sen_dfm <- dfm_remove(sen_dfm, stopwords1)
 sen_dfm <- dfm_select(sen_dfm, min_nchar = 2)
-docnames(sen_dfm) <- paste(sen_dfm$Nome, sen_dfm$Partido, sep = " ")
+docnames(sen_dfm) <- paste(sen_dfm$Partido)
 ```
 
-```{r eval=FALSE, include=FALSE}
+```{r}
 sen_dfm_idf <- dfm_tfidf(sen_dfm)
 ```
 
-```{r eval=FALSE, include=FALSE}
-textstat_frequency(sen_dfm, force = TRUE)
+```{r}
+textstat_frequency(sen_dfm)
 ```
 
 
@@ -123,20 +109,20 @@ plot(stm_model,
 # Wordfish 
 
 ```{r}
-wf <- textmodel_wordfish(sen_dfm, dir = c(99, 93), sparse = TRUE)
+wf <- textmodel_wordfish(sen_dfm, dir = c(20, 19), sparse = TRUE)
 ```
 
 ```{r}
 textplot_scale1d(wf)
-textplot_scale1d(wf, margin = "documents", groups = sen_dfm$Partido)
 textplot_scale1d(wf, margin = "documents", groups = sen_dfm$UfParlamentarNaData)
+textplot_scale1d(wf, margin = "features", highlighted = "deus", "rj")
 ```
 
 
 # Keyness
 
 ```{r}
-head(textstat_keyness(sen_dfm, "Flavio Bolsonaro PSL"))
+textstat_keyness(sen_dfm, "PSL")
 ```
 
 
