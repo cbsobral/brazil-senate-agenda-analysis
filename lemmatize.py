@@ -6,13 +6,13 @@ nlp = spacy.load('pt_core_news_sm')
 senado = pd.read_csv('C:/Users/carol/Desktop/sen.csv', encoding = "LATIN1")
 
 def lemmatize(text):
-    """Perform lemmatization and stopword removal in the clean text
+    """Perform lemmatization in text
        Returns lower case lemmatized texts
     """
     doc = nlp(text)
-    lemma_list = ' '.join([str(tok.lemma_).lower() for tok in doc
+    lemma_text = ' '.join([str(tok.lemma_).lower() for tok in doc
                   if tok.is_alpha and tok.text.lower()])
-    return lemma_list
+    return lemma_text
 
 # Apply function
 senado['clean'] = senado['Pronunciamento'].apply(lemmatize)
