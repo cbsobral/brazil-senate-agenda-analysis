@@ -86,7 +86,7 @@ wf <- textmodel_wordfish(sen_dfm, dir = c(20, 19), sparse = TRUE)
 textplot_scale1d(wf)
 
 # Graph word positions
-textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'rj')
+textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
 ```
 
 
@@ -96,7 +96,7 @@ textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'rj')
 
 ```{r}
 # Keyword in context == 'deus'
-head(kwic(sen_corpus, pattern = 'deus', window = 3, valuetype = 'glob'))
+kwic(sen_corpus, pattern = 'deus', window = 3, valuetype = 'glob')
 ```
 
 
