@@ -35,7 +35,7 @@ glimpse(sen_df)
 # Load corpus
 load('C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/sen_corpus.Rda')
 
-#Load DFM
+# Load DFM
 load('C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/sen_dfm.Rda')
 ```
 
