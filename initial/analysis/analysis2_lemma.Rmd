@@ -1,0 +1,162 @@
+---
+title: "Senado"
+output:
+  html_document:
+    theme: journal
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(tidytext)
+library(dplyr)
+library(quanteda)
+library(quanteda.textmodels)
+library(stm)
+library(topicmodels)
+```
+
+# Pre-process
+
+```{r}
+# Load df or lemma
+load("~/Desktop/R - Stat II/tada/corpus/sen_corpus_lemma.Rda") 
+# Execute if using lemma
+sen_corpus_df <- sen_corpus_lemma 
+
+sen_corpus_df  <- sen_corpus_df %>% 
+  rename(Pronunciamento = PronunciamentoLemma)
+```
+
+
+```{r}
+sen_corpus <- corpus(sen_corpus_df, docid_field = "CodigoPronunciamento", 
+                     text_field = "Pronunciamento")
+```
+
+
+```{r warning=FALSE}
+sen_dfm <- dfm(sen_corpus,
+  tolower = TRUE,
+  remove_punct = TRUE,
+  remove = stopwords("portuguese"),
+  remove_numbers = TRUE,
+  removeSeparators = TRUE,
+  remove_symbols = TRUE,
+  stem = FALSE,  groups = "Partido")
+
+
+stopwords1 <- c("presidente", "exa", "excelencia", "senhor", "aqui", "porque", "ser",
+                "então", "quero", "vai", "ainda", "ter", "pode", "bem", "obrigado",
+                "assim", "dessa", "srs", "cada", "portanto", "outro", "toda", "além", 
+                "nesse", "nesta", "desta", "deste", "disso", "sra", "pois", "nó", "sr",
+                "aí", "senador", "senadores", "lá", "umar", "ir", "estar", "pelar", "querer", "fazer", "dizer", "vir", "haver", "todo", "dar", "falar", "ver", "parir")
+
+sen_dfm <- dfm_remove(sen_dfm, stopwords1)
+sen_dfm <- dfm_select(sen_dfm, min_nchar = 2)
+docnames(sen_dfm) <- paste(sen_dfm$Partido)
+```
+
+```{r}
+sen_dfm_idf <- dfm_tfidf(sen_dfm)
+```
+
+```{r}
+textstat_frequency(sen_dfm)
+```
+
+
+# STM
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+sen_dfm_stm <- asSTMCorpus(sen_dfm)
+
+stm_model <- stm(sen_dfm_stm$documents, sen_dfm_stm$vocab, 10, data = sen_dfm_stm$data, seed = 123)
+```
+
+```{r}
+words_stm <- as.data.frame(t(labelTopics(stm_model, n = 10)$frex))
+labelTopics(stm_model, n = 10)
+```
+ 
+```{r}
+plot(
+  stm_model,
+  type = "summary",
+  text.cex = 0.5,
+  main = "STM topic shares",
+  xlab = "Share estimation"
+)
+```
+
+```{r message=FALSE, warning=FALSE}
+stm::cloud(stm_model,topic = 3, scale = c(2.25, .5))
+```
+
+```{r}
+plot(stm_model,
+     type = "perspectives",
+     topics = c(4, 5),
+     main = "Putting two different topics in perspective")
+```
+
+
+# Wordfish 
+
+```{r}
+wf <- textmodel_wordfish(sen_dfm, dir = c(20, 19), sparse = TRUE)
+```
+
+```{r}
+textplot_scale1d(wf)
+textplot_scale1d(wf, margin = "documents", groups = sen_dfm$UfParlamentarNaData)
+textplot_scale1d(wf, margin = "features", highlighted = "deus", "rj")
+```
+
+
+# Keyness
+
+```{r}
+textstat_keyness(sen_dfm, "PT")
+```
+```{r}
+textstat_keyness(sen_dfm, "PSL")
+```
+```{r}
+textstat_keyness(sen_dfm, "PSDB")
+```
+# LDA
+
+```{r}
+lda_model <- LDA(sen_dfm, k = 6, control = list(seed = 123))
+```
+
+
+```{r}
+topics <- tidy(lda_model, matrix = "beta")
+
+top_terms <- topics %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>% 
+  arrange(desc(beta))
+```
+
+
+```{r}
+top_terms_graph <- top_terms %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered()
+
+top_terms_graph
