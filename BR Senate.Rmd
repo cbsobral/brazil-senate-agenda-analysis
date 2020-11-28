@@ -1,5 +1,5 @@
 ---
-title: "Brazilian Senate Speeches"
+title: 'Brazilian Senate Speeches'
 output: 
   html_document: 
     toc: yes
@@ -29,42 +29,24 @@ library(stm)
 
 ```{r}
 # Load data frame
-load("/cloud/project/senate/data/sen_df.Rda")
+load('C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/sen_df.Rda')
 glimpse(sen_df)
-```
 
-```{r corpus}
-# Create corpus
-sen_corpus <- corpus(sen_df, docid_field = "CodigoPronunciamento", 
-                     text_field = "Pronunciamento")
-```
+# Load corpus
+load('C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/sen_corpus.Rda')
 
-
-```{r dfm eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-# Create DFM
-## Não roda no Cloud. Tirei do knit e coloquei load() ali embaixo. ##
-sen_dfm <- dfm(sen_corpus,
-  tolower = TRUE,
-  remove_punct = TRUE,
-  remove = stopwords("portuguese"),
-  remove_numbers = TRUE,
-  removeSeparators = TRUE,
-  remove_symbols = TRUE,
-  stem = FALSE,  
-  groups = "Partido")
+#Load DFM
+load('C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/sen_dfm.Rda')
 ```
 
 
-```{r dfm clean}
-# Load DFM
-load("/cloud/project/senate/data/sen_dfm.Rda") # completa, sem filtro nenhum
-
+```{r}
 # Additional stopwords
-stopwords1 <- c("presidente", "exa", "excelencia", "senhor", "aqui", "porque", "ser",
-                "então", "quero", "vai", "ainda", "ter", "pode", "bem", "obrigado",
-                "assim", "dessa", "srs", "cada", "portanto", "outro", "toda", "além", 
-                "nesse", "nesta", "desta", "deste", "disso", "sra", "pois", "nó", "sr",
-                "aí", "senador", "senadores")
+stopwords1 <- c('presidente', 'exa', 'excelencia', 'senhor', 'aqui', 'porque', 'ser',
+                'então', 'quero', 'vai', 'ainda', 'ter', 'pode', 'bem', 'obrigado',
+                'assim', 'dessa', 'srs', 'cada', 'portanto', 'outro', 'toda', 'além', 
+                'nesse', 'nesta', 'desta', 'deste', 'disso', 'sra', 'pois', 'nó', 'sr',
+                'aí', 'senador', 'senadores')
 
 
 # Remove additional stopwords
@@ -81,7 +63,7 @@ sen_dfm <- dfm_select(sen_dfm, min_nchar = 2)
 docnames(sen_dfm) <- paste(sen_dfm$Partido)
 
 # Summary 
-head(dfm_sort(sen_dfm, decreasing = TRUE, margin = "both"), n = 10, nf = 5) 
+head(dfm_sort(sen_dfm, decreasing = TRUE, margin = 'both'), n = 10, nf = 5) 
 ```
 
 
@@ -104,15 +86,17 @@ wf <- textmodel_wordfish(sen_dfm, dir = c(20, 19), sparse = TRUE)
 textplot_scale1d(wf)
 
 # Graph word positions
-textplot_scale1d(wf, margin = "features", highlighted = "deus", "rj")
+textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'rj')
 ```
 
 
 # Religion
 
+## Word Collocations
+
 ```{r}
-# Keyword in context
-head(kwic(sen_corpus, pattern = "deus", window = 3, valuetype = "glob"))
+# Keyword in context == 'deus'
+head(kwic(sen_corpus, pattern = 'deus', window = 3, valuetype = 'glob'))
 ```
 
 
