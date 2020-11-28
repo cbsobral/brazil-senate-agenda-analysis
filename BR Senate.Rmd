@@ -1,0 +1,118 @@
+---
+title: "Brazilian Senate Speeches"
+output: 
+  html_document: 
+    toc: yes
+    theme: paper
+    toc_float:
+      collapsed: no
+    df_print: kable
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(tidyverse)
+library(tidytext)
+library(quanteda)
+library(quanteda.textmodels)
+library(stm)
+```
+
+
+# Pre-processing
+
+```{r}
+# Load data frame
+load("/cloud/project/senate/data/sen_df.Rda")
+glimpse(sen_df)
+```
+
+```{r corpus}
+# Create corpus
+sen_corpus <- corpus(sen_df, docid_field = "CodigoPronunciamento", 
+                     text_field = "Pronunciamento")
+```
+
+
+```{r dfm eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# Create DFM
+## Não roda no Cloud. Tirei do knit e coloquei load() ali embaixo. ##
+sen_dfm <- dfm(sen_corpus,
+  tolower = TRUE,
+  remove_punct = TRUE,
+  remove = stopwords("portuguese"),
+  remove_numbers = TRUE,
+  removeSeparators = TRUE,
+  remove_symbols = TRUE,
+  stem = FALSE,  
+  groups = "Partido")
+```
+
+
+```{r dfm clean}
+# Load DFM
+load("/cloud/project/senate/data/sen_dfm.Rda") # completa, sem filtro nenhum
+
+# Additional stopwords
+stopwords1 <- c("presidente", "exa", "excelencia", "senhor", "aqui", "porque", "ser",
+                "então", "quero", "vai", "ainda", "ter", "pode", "bem", "obrigado",
+                "assim", "dessa", "srs", "cada", "portanto", "outro", "toda", "além", 
+                "nesse", "nesta", "desta", "deste", "disso", "sra", "pois", "nó", "sr",
+                "aí", "senador", "senadores")
+
+
+# Remove additional stopwords
+#sen_dfm <- dfm_remove(sen_dfm, stopwords1)
+
+# Set minumum number of characters
+sen_dfm <- dfm_select(sen_dfm, min_nchar = 2)
+
+# Keep only words occurring in at most 9/10 of the documents
+## acho que não precisa já que a análise vai ser de palavras usadas pelos dois lados. + se usarmos essa função, a palavra 'deus' sai da dfm. ##
+#sen_dfm <- dfm_trim(sen_dfm, max_docfreq = 0.95, docfreq_type = 'prop')
+
+# Name documents
+docnames(sen_dfm) <- paste(sen_dfm$Partido)
+
+# Summary 
+head(dfm_sort(sen_dfm, decreasing = TRUE, margin = "both"), n = 10, nf = 5) 
+```
+
+
+# Wordfish 
+
+```{r}
+# Print doc 20
+sen_dfm[20,1]
+
+# Print doc 19
+sen_dfm[19,1]
+
+# Wordfish model
+wf <- textmodel_wordfish(sen_dfm, dir = c(20, 19), sparse = TRUE)
+```
+
+
+```{r}
+# Graph party positions
+textplot_scale1d(wf)
+
+# Graph word positions
+textplot_scale1d(wf, margin = "features", highlighted = "deus", "rj")
+```
+
+
+# Religion
+
+```{r}
+# Keyword in context
+head(kwic(sen_corpus, pattern = "deus", window = 3, valuetype = "glob"))
+```
+
+
