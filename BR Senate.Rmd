@@ -90,6 +90,12 @@ textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
 ```
 
 
+```{r}
+load("C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/wiki_partidos.Rda")
+wiki_partidos
+```
+
+
 # Religion
 
 ## Word Collocations
