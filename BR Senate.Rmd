@@ -95,7 +95,7 @@ load("C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/wiki_parti
 wiki_partidos
 ```
 
-## Number of senators by gender
+## Number of senators by gender/state
 
 ```{r}
 load("C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/senators.Rda")
