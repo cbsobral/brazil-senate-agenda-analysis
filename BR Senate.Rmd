@@ -17,6 +17,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r message=FALSE, warning=FALSE}
 library(dplyr)
+library(ggrepel)
+library(ggplot2)
 library(tidyverse)
 library(tidytext)
 library(quanteda)
@@ -29,6 +31,7 @@ library(stm)
 
 ```{r}
 # Load data frame
+load("../tada/data/senators.Rda")
 load('../tada/data/sen_df.Rda')
 glimpse(sen_df)
 
@@ -50,7 +53,7 @@ stopwords1 <- c('presidente', 'exa', 'excelencia', 'senhor', 'aqui', 'porque', '
 
 
 # Remove additional stopwords
-#sen_dfm <- dfm_remove(sen_dfm, stopwords1)
+sen_dfm <- dfm_remove(sen_dfm, stopwords1)
 
 # Set minumum number of characters
 sen_dfm <- dfm_select(sen_dfm, min_nchar = 2)
@@ -91,6 +94,32 @@ textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
 
 
 ```{r}
+# Features usage left/right
+feat <- data.frame(
+  word = wf$features,
+  beta = wf$beta,
+  psi = wf$psi,
+  stringsAsFactors = FALSE)
+
+# Graph top 30 psi per beta
+feat %>% 
+  top_n(30, psi) %>%  # word fixed-effects
+  ggplot(aes(x = beta, y = psi, label = word)) +
+  geom_point() +
+  geom_text_repel() +
+  theme_classic()
+
+# Left
+feat %>% 
+  top_n(-30, beta)
+
+# Right
+feat %>% 
+  top_n(30, beta)
+```
+
+
+```{r}
 load("../tada/data/wiki_partidos.Rda")
 wiki_partidos
 ```
@@ -98,8 +127,6 @@ wiki_partidos
 ## Number of senators/speeches by gender/state
 
 ```{r message=FALSE, warning=FALSE}
-load("../tada/data/senators.Rda")
-
 # Table
 senators %>% 
   group_by(party_abbr, gender) %>% 
