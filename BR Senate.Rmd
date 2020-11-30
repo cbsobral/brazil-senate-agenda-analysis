@@ -133,7 +133,6 @@ senators %>%
 ```{r}
 # Keyword in context == 'evangélico'
 kwic(sen_corpus, pattern = 'evangélico', window = 3, valuetype = 'glob')
-beep()
 ```
 
 
