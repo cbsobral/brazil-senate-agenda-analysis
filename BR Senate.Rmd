@@ -29,14 +29,14 @@ library(stm)
 
 ```{r}
 # Load data frame
-load('C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/sen_df.Rda')
+load('../tada/data/sen_df.Rda')
 glimpse(sen_df)
 
 # Load corpus
-load('C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/sen_corpus.Rda')
+load('../tada/data/sen_corpus.Rda')
 
 # Load DFM
-load('C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/sen_dfm.Rda')
+load('../tada/data/sen_dfm.Rda')
 ```
 
 
@@ -91,22 +91,22 @@ textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
 
 
 ```{r}
-load("C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/wiki_partidos.Rda")
+load("../tada/data/wiki_partidos.Rda")
 wiki_partidos
 ```
 
-## Number of senators by gender/state
+## Number of senators/speeches by gender/state
 
-```{r}
-load("C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/senators.Rda")
+```{r message=FALSE, warning=FALSE}
+load("../tada/data/senators.Rda")
 
 # Table
 senators %>% 
   group_by(party_abbr, gender) %>% 
   summarise(n = n())
 
-# Plot by party
-senators %>% 
+# Plot senators by gender
+gender_sen <- senators %>% 
   group_by(party_abbr, gender) %>% 
   summarise(n = n()) %>%
   ggplot(aes(party_abbr, n)) +
@@ -115,14 +115,38 @@ senators %>%
   theme_classic() +
   theme(axis.text.x = element_text(angle = 90)) 
 
-# Plot by state
-senators %>% 
+# Plot speeches by gender
+gender_speech <- sen_df %>% 
+  group_by(Partido, gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(Partido, n)) +
+  geom_col(aes(fill = gender)) +
+  ylab("# Speeches") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90))
+
+gridExtra::grid.arrange(gender_sen, gender_speech)
+
+
+# Plot senators by state
+state_sen <- senators %>% 
   group_by(state, gender) %>% 
   summarise(n = n()) %>%
   ggplot(aes(state, n)) +
   geom_col(aes(fill = gender)) +
   ylab("# Senators") +
   theme_classic() 
+
+# Plot speeches by state
+state_speech <- sen_df %>% 
+  group_by(UfParlamentarNaData, gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(UfParlamentarNaData, n)) +
+  geom_col(aes(fill = gender)) +
+  ylab("# Speeches") +
+  theme_classic() 
+
+gridExtra::grid.arrange(state_sen, state_speech)
 ```
 
 
