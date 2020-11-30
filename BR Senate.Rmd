@@ -95,14 +95,45 @@ load("C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/wiki_parti
 wiki_partidos
 ```
 
+## Number of senators by gender
+
+```{r}
+load("C:/Users/carol/Desktop/Fall_2020/Python/github_python/tada/data/senators.Rda")
+
+# Table
+senators %>% 
+  group_by(party_abbr, gender) %>% 
+  summarise(n = n())
+
+# Plot by party
+senators %>% 
+  group_by(party_abbr, gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(party_abbr, n)) +
+  geom_col(aes(fill = gender)) +
+  ylab("# Senators") +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90)) 
+
+# Plot by state
+senators %>% 
+  group_by(state, gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(state, n)) +
+  geom_col(aes(fill = gender)) +
+  ylab("# Senators") +
+  theme_classic() 
+```
+
 
 # Religion
 
 ## Word Collocations
 
 ```{r}
-# Keyword in context == 'deus'
-kwic(sen_corpus, pattern = 'deus', window = 3, valuetype = 'glob')
+# Keyword in context == 'evangélico'
+kwic(sen_corpus, pattern = 'evangélico', window = 3, valuetype = 'glob')
+beep()
 ```
 
 
