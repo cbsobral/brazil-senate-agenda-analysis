@@ -27,11 +27,13 @@ library(stm)
 ```
 
 
-# Pre-processing
+# Data
 
 ```{r}
-# Load data frame
+# Load senators data frame
 load("../tada/data/senators.Rda")
+
+# Load speeches data frame
 load('../tada/data/sen_df.Rda')
 glimpse(sen_df)
 
@@ -70,61 +72,7 @@ head(dfm_sort(sen_dfm, decreasing = TRUE, margin = 'both'), n = 10, nf = 5)
 ```
 
 
-# Wordfish 
-
-```{r}
-# Print doc 20
-sen_dfm[20,1]
-
-# Print doc 19
-sen_dfm[19,1]
-
-# Wordfish model
-wf <- textmodel_wordfish(sen_dfm, dir = c(20, 19), sparse = TRUE)
-```
-
-
-```{r}
-# Graph party positions
-textplot_scale1d(wf)
-
-# Graph word positions
-textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
-```
-
-
-```{r}
-# Features usage left/right
-feat <- data.frame(
-  word = wf$features,
-  beta = wf$beta,
-  psi = wf$psi,
-  stringsAsFactors = FALSE)
-
-# Graph top 30 psi per beta
-feat %>% 
-  top_n(30, psi) %>%  # word fixed-effects
-  ggplot(aes(x = beta, y = psi, label = word)) +
-  geom_point() +
-  geom_text_repel() +
-  theme_classic()
-
-# Left
-feat %>% 
-  top_n(-30, beta)
-
-# Right
-feat %>% 
-  top_n(30, beta)
-```
-
-
-```{r}
-load("../tada/data/wiki_partidos.Rda")
-wiki_partidos
-```
-
-## Number of senators/speeches by gender/state
+# Number of senators/speeches by gender/state
 
 ```{r message=FALSE, warning=FALSE}
 # Table
@@ -177,6 +125,73 @@ gridExtra::grid.arrange(state_sen, state_speech)
 ```
 
 
+# Keyness 
+
+```{r}
+textplot_keyness(textstat_keyness(sen_dfm, target = sen_dfm$Partido == "PSL"))
+textplot_keyness(textstat_keyness(sen_dfm, target = sen_dfm$Partido == "PT"))
+textplot_keyness(textstat_keyness(sen_dfm, target = sen_dfm$Partido == "PSDB"))
+```
+
+
+# Wordfish
+
+```{r}
+# Print doc 20
+sen_dfm[20,1]
+
+# Print doc 19
+sen_dfm[19,1]
+
+# Wordfish model
+wf <- textmodel_wordfish(sen_dfm, dir = c(20, 19), sparse = TRUE)
+```
+
+## Party Position
+
+```{r}
+# Graph party positions
+textplot_scale1d(wf)
+```
+
+```{r}
+# Table with party position from external sources
+load("../tada/data/wiki_partidos.Rda")
+wiki_partidos
+```
+
+
+## Feature Analysis
+
+```{r}
+# Graph word positions
+textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
+
+# Features usage left/right
+feat <- data.frame(
+  word = wf$features,
+  beta = wf$beta,
+  psi = wf$psi,
+  stringsAsFactors = FALSE)
+
+# Graph top 30 psi per beta
+feat %>% 
+  top_n(30, psi) %>%  # word fixed-effects
+  ggplot(aes(x = beta, y = psi, label = word)) +
+  geom_point() +
+  geom_text_repel() +
+  theme_classic()
+
+# Left
+feat %>% 
+  top_n(-30, beta)
+
+# Right
+feat %>% 
+  top_n(30, beta)
+```
+
+
 # Religion
 
 ## Word Collocations
@@ -185,5 +200,18 @@ gridExtra::grid.arrange(state_sen, state_speech)
 # Keyword in context == 'evangélico'
 kwic(sen_corpus, pattern = 'evangélico', window = 3, valuetype = 'glob')
 ```
+
+
+## Word Correlations
+
+```{r message=FALSE, warning=FALSE}
+# Convert dfm into relative frequency and find correlations
+dfm_weight(sen_dfm, scheme = "prop") %>% 
+    textstat_simil(selection = c("deus", "evangélico", "igreja"), 
+                   method = "correlation", margin = "features") %>%
+    as.matrix() %>%
+    head(15)
+```
+
 
 
