@@ -1,0 +1,233 @@
+---
+title: 'Brazilian Senate Speeches'
+output: 
+  html_document: 
+    toc: yes
+    theme: paper
+    toc_float:
+      collapsed: no
+    df_print: kable
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggrepel)
+library(ggplot2)
+library(tidyverse)
+library(tidytext)
+library(quanteda)
+library(quanteda.textmodels)
+library(stm)
+```
+
+
+# Data
+
+```{r}
+# Load senators data frame
+load('data/sen_df.Rda')
+str(sen_df)
+
+# Load speeches data frame
+load('data/speech_df.Rda')
+str(speech_df)
+```
+
+
+```{r}
+# Corpus
+corp_sen <- corpus(speech_df, docid_field = 'CodigoPronunciamento', 
+                     text_field = 'Pronunciamento')
+
+# DFM
+dfmat_sen <- dfm(corp_sen,
+  tolower = TRUE,
+  remove_punct = TRUE,
+  remove = stopwords('portuguese'),
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  remove_symbols = TRUE,
+  stem = FALSE,  
+  groups = 'Partido')
+
+
+# Additional stopwords
+stopwords1 <- c('presidente', 'exa', 'excelencia', 'senhor', 'aqui', 'porque', 'ser',
+                'então', 'quero', 'vai', 'ainda', 'ter', 'pode', 'bem', 'obrigado',
+                'assim', 'dessa', 'srs', 'cada', 'portanto', 'outro', 'toda', 'além', 
+                'nesse', 'nesta', 'desta', 'deste', 'disso', 'sra', 'pois', 'nó', 'sr',
+                'aí', 'senador', 'senadores')
+
+
+# Remove additional stopwords
+dfmat_sen <- dfm_remove(dfmat_sen, stopwords1)
+
+# Set minumum number of characters
+dfmat_sen <- dfm_select(dfmat_sen, min_nchar = 2)
+
+# Keep only words occurring in at most 9/10 of the documents
+## acho que não precisa já que a análise vai ser de palavras usadas pelos dois lados. + se usarmos essa função, a palavra 'deus' sai da dfm. ##
+#dfmat_sen <- dfm_trim(dfmat_sen, max_docfreq = 0.95, docfreq_type = 'prop')
+
+# Name documents
+docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
+
+# Summary 
+head(dfm_sort(dfmat_sen, decreasing = TRUE, margin = 'both'), n = 10, nf = 5) 
+```
+
+
+# Number of senators/speeches
+
+## By Gender
+
+```{r message=FALSE, warning=FALSE}
+# Table
+sen_df %>% 
+  group_by(party_abbr, gender) %>% 
+  summarise(n = n())
+
+# Plot senators by gender
+gender_sen <- sen_df %>% 
+  group_by(party_abbr, gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(party_abbr, n)) +
+  geom_col(aes(fill = gender)) +
+  ylab('# Senators') +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90)) 
+
+# Plot speeches by gender
+gender_speech <- speech_df %>% 
+  group_by(Partido, Gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(Partido, n)) +
+  geom_col(aes(fill = Gender)) +
+  ylab('# Speeches') +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90))
+
+gridExtra::grid.arrange(gender_sen, gender_speech)
+```
+
+
+## By State
+```{r message=FALSE, warning=FALSE}
+# Plot senators by state
+state_sen <- sen_df %>% 
+  group_by(state, gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(state, n)) +
+  geom_col(aes(fill = gender)) +
+  ylab('# Senators') +
+  theme_classic() 
+
+# Plot speeches by state
+state_speech <- speech_df %>% 
+  group_by(UfParlamentarNaData, Gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(UfParlamentarNaData, n)) +
+  geom_col(aes(fill = Gender)) +
+  ylab('# Speeches') +
+  theme_classic() 
+
+gridExtra::grid.arrange(state_sen, state_speech)
+```
+
+
+# Keyness 
+
+```{r}
+textplot_keyness(textstat_keyness(dfmat_sen, target = dfmat_sen$Partido == 'PSL'))
+textplot_keyness(textstat_keyness(dfmat_sen, target = dfmat_sen$Partido == 'PT'))
+textplot_keyness(textstat_keyness(dfmat_sen, target = dfmat_sen$Partido == 'PSDB'))
+```
+
+
+# Wordfish
+
+```{r}
+# Print doc 20
+dfmat_sen[20, 1]
+
+# Print doc 19
+dfmat_sen[19, 1]
+
+# Wordfish model
+wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 19), sparse = TRUE)
+```
+
+## Party Position
+
+```{r}
+# Graph party positions
+textplot_scale1d(wf)
+```
+
+```{r}
+# Table with party position from external sources
+load('../tada/data/wiki_partidos.Rda')
+wiki_partidos
+```
+
+
+## Feature Analysis
+
+```{r}
+# Graph word positions
+textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
+
+# Features usage left/right
+feat <- data.frame(
+  word = wf$features,
+  beta = wf$beta,
+  psi = wf$psi,
+  stringsAsFactors = FALSE)
+
+# Graph top 30 psi per beta
+feat %>% 
+  top_n(30, psi) %>%  # word fixed-effects
+  ggplot(aes(x = beta, y = psi, label = word)) +
+  geom_point() +
+  geom_text_repel() +
+  theme_classic()
+
+# Left
+feat %>% 
+  top_n(-30, beta)
+
+# Right
+feat %>% 
+  top_n(30, beta)
+```
+
+
+# Religion
+
+## Word Collocations
+
+```{r}
+# Keyword in context == 'evangélico'
+kwic(corp_sen, pattern = 'evangélico', window = 3, valuetype = 'glob')
+```
+
+
+## Word Correlations
+
+```{r message=FALSE, warning=FALSE}
+# Convert dfm into relative frequency and find correlations
+dfm_weight(dfmat_sen, scheme = 'prop') %>% 
+    textstat_simil(selection = c('deus', 'evangélico', 'igreja'), 
+                   method = 'correlation', margin = 'features') %>%
+    as.matrix() %>%
+    head(15)
+```
+
+
+

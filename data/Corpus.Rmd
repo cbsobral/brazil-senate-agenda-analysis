@@ -99,6 +99,7 @@ speeches_df <- speeches_df %>%
 save(speeches_df, file = "speeches_df.Rda")
 ```
 
+
 Merge the two data frames and remove empty rows. Here we go from 17544 observations to 15588 because 1956 of the speech files downloaded were empty. 
 
 ```{r}
@@ -108,8 +109,10 @@ sen_corpus_df <- merge(sen_df, speeches_df, by = "CodigoPronunciamento") %>%
   na.omit 
 
 # Save corpus data frame
-save(sen_corpus_df, file = "sen_corpus_df.Rda")
+save(sen_df, file = "sen_df.Rda")
+```
 
+```{r}
 # Import lemmatized speeches (from python-spacy)
 senado1 <- read_csv("C:/Users/carol/Desktop/senado1.csv")
 
@@ -125,32 +128,5 @@ sen_corpus_lemma <- merge(sen_corpus_df, sen_corpus_lemma, by = "CodigoPronuncia
 # Select columns and save corpus_lemma data frame
 sen_corpus_lemma <- sen_corpus_lemma[c(-8)]
 save(sen_corpus_lemma, file = "sen_corpus_lemma.Rda")
-```
-
-
-```{r}
-# Create corpus
-sen_corpus <- corpus(sen_corpus_df, docid_field = "CodigoPronunciamento", 
-                     text_field = "Pronunciamento")
-
-# Save
-save(sen_corpus, file = "sen_corpus.Rda")
-```
-
-DFM grouped by senator name (`Nome`).
-
-```{r}
-# DFM 
-sen_dfm <- dfm(sen_corpus,
-  toLower = TRUE,
-  remove_punct = TRUE,
-  remove = stopwords("portuguese"),
-  remove_numbers = TRUE,
-  removeSeparators = TRUE,
-  remove_symbols = TRUE,
-  stem = FALSE,  groups = "Nome")
-
-# Save
-save(sen_dfm, file = "sen_dfm.Rda")
 ```
 
