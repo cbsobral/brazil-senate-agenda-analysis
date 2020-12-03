@@ -190,7 +190,7 @@ wiki_partidos %>%
 
 ```{r}
 # Graph word positions
-#textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
+textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
 
 # Features usage left/right
 feat <- data.frame(
@@ -247,13 +247,21 @@ dfm_weight(dfmat_sen, scheme = 'prop') %>%
 
 ```{r}
 # dictionary
-# from "dictionaries/policy_agendas_english.RData"
-econ.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'controle', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*')))
+# economy from 'dictionaries/policy_agendas_english.RData'
+theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*'), social = c('mulher*', 'home*', 'famíl*', 'famil*', 'sex*')))
 
+dfmat_theme <- dfm(corp_sen, dictionary = theme.lexicon)
+dfmat_theme <- dfm_weight(dfmat_theme, scheme = 'prop')
+convert(dfmat_theme, 'data.frame')
 
+dfm_lookup(dfmat_sen, theme.lexicon, valuetype = "glob")
 
-dfmat_econ <- dfm(corp_sen, groups = "Partido", dictionary = econ.lexicon)
-dfmat_econ.prop <- dfm_weight(dfmat_econ, scheme = "prop")
-convert(dfmat_econ.prop, "data.frame")
+econ_docid <- convert(dfmat_theme, 'data.frame') %>% 
+  filter(economy > social) %>% 
+  select(doc_id) %>% 
+  as.list(doc_id)
+
+summary(corpus_subset(corp_sen, id %in% econ_docid))
+
 ```
 
