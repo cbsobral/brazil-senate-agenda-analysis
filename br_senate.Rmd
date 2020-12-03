@@ -219,10 +219,11 @@ feat %>%
   DT::datatable()
 ```
 
+# Topics
 
-# Religion
+## Religion
 
-## Word Collocations
+### Word Collocations
 
 ```{r}
 # Keyword in context == 'evangélico'
@@ -230,7 +231,7 @@ kwic(corp_sen, pattern = 'evangélico', window = 3, valuetype = 'glob')
 ```
 
 
-## Word Correlations
+### Word Correlations
 
 ```{r message=FALSE, warning=FALSE}
 # Convert dfm into relative frequency and find correlations
@@ -242,4 +243,17 @@ dfm_weight(dfmat_sen, scheme = 'prop') %>%
 ```
 
 
+## Economy
+
+```{r}
+# dictionary
+# from "dictionaries/policy_agendas_english.RData"
+econ.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'controle', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*')))
+
+
+
+dfmat_econ <- dfm(corp_sen, groups = "Partido", dictionary = econ.lexicon)
+dfmat_econ.prop <- dfm_weight(dfmat_econ, scheme = "prop")
+convert(dfmat_econ.prop, "data.frame")
+```
 
