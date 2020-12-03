@@ -243,25 +243,41 @@ dfm_weight(dfmat_sen, scheme = 'prop') %>%
 ```
 
 
-## Economy
-
+## Dictionary Analysis
 ```{r}
-# dictionary
-# economy from 'dictionaries/policy_agendas_english.RData'
+# Create Dictionary
+# -- economy words from 'dictionaries/policy_agendas_english.RData' --
 theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*'), social = c('mulher*', 'home*', 'famíl*', 'famil*', 'sex*')))
 
-dfmat_theme <- dfm(corp_sen, dictionary = theme.lexicon)
-dfmat_theme <- dfm_weight(dfmat_theme, scheme = 'prop')
-convert(dfmat_theme, 'data.frame')
 
-dfm_lookup(dfmat_sen, theme.lexicon, valuetype = "glob")
-
-econ_docid <- convert(dfmat_theme, 'data.frame') %>% 
-  filter(economy > social) %>% 
-  select(doc_id) %>% 
-  as.list(doc_id)
-
-summary(corpus_subset(corp_sen, id %in% econ_docid))
-
+# Create DFM with theme.lexicon, apply weights and convert to data frame
+theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>% 
+    dfm_weight(scheme = 'prop') %>% 
+    convert('data.frame')
 ```
 
+
+###  Economy
+```{r}
+# List with documents about economy
+econ_id <- theme_df %>% 
+  filter(economy > 0.9) %>% 
+  pull(doc_id)
+
+# DFM with econ documents
+dfmat_econ <- speech_df %>% 
+  subset(CodigoPronunciamento %in% econ_id) %>% 
+  corpus(docid_field = 'CodigoPronunciamento', text_field = 'Pronunciamento') %>% 
+  dfm(tolower = TRUE,
+      remove_punct = TRUE,
+      remove = stopwords('portuguese'),
+      remove_numbers = TRUE,
+      remove_separators = TRUE,
+      remove_symbols = TRUE,
+      stem = FALSE,  
+      groups = 'Partido')
+
+# Wordfish  
+wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(20, 11), sparse = TRUE)
+textplot_scale1d(wf_econ)
+```
