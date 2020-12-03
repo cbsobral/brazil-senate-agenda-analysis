@@ -29,22 +29,15 @@ library(stm)
 # Ideas
 
 * How parties position themselves in senate speeches x party manifesto -- Wordfish comparison.
-* Scale speeches separated by theme (economy, 'societal policy', [...]) -- separation by dictionaries? topic modeling?
 
 # Data
 
-```{r}
-# Load senators data frame
-load('data/sen_df.Rda')
-glimpse(sen_df)
+## Senate
 
+```{r}
 # Load speeches data frame
 load('data/speech_df.Rda')
-glimpse(speech_df)
-```
 
-
-```{r}
 # Corpus
 corp_sen <- corpus(speech_df, docid_field = 'CodigoPronunciamento', 
                      text_field = 'Pronunciamento')
@@ -81,85 +74,44 @@ dfmat_sen <- dfm_select(dfmat_sen, min_nchar = 2)
 
 # Name documents
 docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
-
-# Summary 
-head(dfm_sort(dfmat_sen, decreasing = TRUE, margin = 'both'), n = 10, nf = 5) 
 ```
 
-
-# Number of senators/speeches
-
-## By Gender
-
-```{r message=FALSE, warning=FALSE}
-# Table
-sen_df %>% 
-  group_by(party_abbr, gender) %>% 
-  summarise(n = n()) %>% 
-  ungroup() %>% 
-  mutate(prop = (n / sum(n))*100) %>% 
-  DT::datatable()
-
-
-# Plot senators by gender
-gender_sen <- sen_df %>% 
-  group_by(party_abbr, gender) %>% 
-  summarise(n = n()) %>%
-  ggplot(aes(party_abbr, n)) +
-  geom_col(aes(fill = gender)) +
-  ylab('# Senators') +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-# Plot speeches by gender
-gender_speech <- speech_df %>% 
-  group_by(Partido, Gender) %>% 
-  summarise(n = n()) %>%
-  ggplot(aes(Partido, n)) +
-  geom_col(aes(fill = Gender)) +
-  ylab('# Speeches') +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 90))
-
-gridExtra::grid.arrange(gender_sen, gender_speech)
-```
-
-
-## By State
-```{r message=FALSE, warning=FALSE}
-# Plot senators by state
-# https://www25.senado.leg.br/web/senadores/por-uf/-/uf/RR -- RR 2 senadores
-state_sen <- sen_df %>% 
-  group_by(state, gender) %>% 
-  summarise(n = n()) %>%
-  ggplot(aes(state, n)) +
-  geom_col(aes(fill = gender)) +
-  ylab('# Senators') +
-  theme_classic() 
-
-# Plot speeches by state
-state_speech <- speech_df %>% 
-  group_by(UfParlamentarNaData, Gender) %>% 
-  summarise(n = n()) %>%
-  ggplot(aes(UfParlamentarNaData, n)) +
-  geom_col(aes(fill = Gender)) +
-  ylab('# Speeches') +
-  theme_classic() 
-
-gridExtra::grid.arrange(state_sen, state_speech)
-```
-
-
-# Keyness 
+## Executive
 
 ```{r}
-textplot_keyness(textstat_keyness(dfmat_sen, target = dfmat_sen$Partido == 'PSL'))
-textplot_keyness(textstat_keyness(dfmat_sen, target = dfmat_sen$Partido == 'PT'))
-textplot_keyness(textstat_keyness(dfmat_sen, target = dfmat_sen$Partido == 'PSDB'))
+# Corpus
+load('data/corp_exec.Rda')
+
+# DFM
+dfmat_exec <- dfm(corp_exec,
+  tolower = TRUE,
+  remove_punct = TRUE,
+  remove = stopwords('portuguese'),
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  remove_symbols = TRUE,
+  stem = FALSE)
+
+
+# Additional stopwords
+stopwords1 <- c('presidente', 'exa', 'excelencia', 'senhor', 'aqui', 'porque', 'ser',
+                'então', 'quero', 'vai', 'ainda', 'ter', 'pode', 'bem', 'obrigado',
+                'assim', 'dessa', 'srs', 'cada', 'portanto', 'outro', 'toda', 'além', 
+                'nesse', 'nesta', 'desta', 'deste', 'disso', 'sra', 'pois', 'nó', 'sr',
+                'aí', 'senador', 'senadores')
+
+
+# Remove additional stopwords
+dfmat_exec <- dfm_remove(dfmat_exec, stopwords1)
+
+# Set minumum number of characters
+dfmat_exec <- dfm_select(dfmat_exec, min_nchar = 2)
 ```
 
 
 # Wordfish
+
+## Senate 
 
 ```{r}
 # Print doc 20
@@ -169,151 +121,21 @@ dfmat_sen[20, 1] # PT
 dfmat_sen[11, 1] # PR
 
 # Wordfish model
-wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
+wf_sen <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
+textplot_scale1d(wf_sen)
 ```
 
-## Party Position
+
+## Executive
 
 ```{r}
-# Graph party positions
-textplot_scale1d(wf)
+# Print doc 3
+dfmat_exec[3, 1] # bolsonaro
+
+# Print doc 11
+dfmat_exec[4, 1] # boulos
+
+# Wordfish model
+wf_exec <- textmodel_wordfish(dfmat_exec, dir = c(4, 3), sparse = TRUE)
+textplot_scale1d(wf_exec)
 ```
-
-```{r}
-# Table with party position from external sources
-load('../tada/data/wiki_partidos.Rda')
-wiki_partidos %>% 
-  DT::datatable()
-```
-
-
-## Feature Analysis
-
-```{r}
-# Graph word positions
-textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
-
-# Features usage left/right
-feat <- data.frame(
-  word = wf$features,
-  beta = wf$beta,
-  psi = wf$psi,
-  stringsAsFactors = FALSE)
-
-
-# Graph top 30 psi per beta
-feat %>% 
-  top_n(30, psi) %>%  # word fixed-effects
-  ggplot(aes(x = beta, y = psi, label = word)) +
-  geom_point() +
-  geom_text_repel() +
-  theme_classic()
-
-# Left
-feat %>% 
-  top_n(-30, beta) %>% 
-  DT::datatable()
-
-# Right
-feat %>% 
-  top_n(30, beta) %>% 
-  DT::datatable()
-```
-
-
-# Topics
-
-## Economy
-
-### Dictionary Analysis
-
-```{r}
-# Create Dictionary
-# -- economy words from policy_agendas_english --
-policy.lexicon <- dictionary(file = 'data/policy_agendas_english.lcd')
-
-theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*'), social = c('mulher*', 'home*', 'famíl*', 'famil*', 'sex*')))
-
-
-# Create DFM with theme.lexicon, apply weights and convert to data frame
-theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>% 
-    dfm_weight(scheme = 'prop') %>% 
-    convert('data.frame')
-```
-
-
-```{r}
-# List with documents about economy
-econ_id <- theme_df %>% 
-  filter(economy > 0.9) %>% 
-  pull(doc_id)
-
-# DFM with econ documents
-dfmat_econ <- speech_df %>% 
-  subset(CodigoPronunciamento %in% econ_id) %>% 
-  corpus(docid_field = 'CodigoPronunciamento', text_field = 'Pronunciamento') %>% 
-  dfm(tolower = TRUE,
-      remove_punct = TRUE,
-      remove = stopwords('portuguese'),
-      remove_numbers = TRUE,
-      remove_separators = TRUE,
-      remove_symbols = TRUE,
-      stem = FALSE,  
-      groups = 'Partido')
-
-# Wordfish for econ
-dfmat_econ[20, 1]
-dfmat_econ[11, 1]
-wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(20, 11), sparse = TRUE)
-textplot_scale1d(wf_econ)
-```
-# Social -- só para demonstração
-```{r}
-# List with documents about social
-social_id <- theme_df %>% 
-  filter(social > 0.8) %>% 
-  pull(doc_id)
-
-# DFM with social documents
-dfmat_social <- speech_df %>% 
-  subset(CodigoPronunciamento %in% social_id) %>% 
-  corpus(docid_field = 'CodigoPronunciamento', text_field = 'Pronunciamento') %>% 
-  dfm(tolower = TRUE,
-      remove_punct = TRUE,
-      remove = stopwords('portuguese'),
-      remove_numbers = TRUE,
-      remove_separators = TRUE,
-      remove_symbols = TRUE,
-      stem = FALSE,  
-      groups = 'Partido')
-
-# Wordfish for econ
-dfmat_social[18, 1]
-dfmat_social[11, 1]
-wf_social <- textmodel_wordfish(dfmat_social, dir = c(18, 11), sparse = TRUE)
-textplot_scale1d(wf_social)
-```
-
-
-## Religion
-
-### Word Collocations
-
-```{r}
-# Keyword in context == 'evangélico'
-kwic(corp_sen, pattern = 'evangélico', window = 3, valuetype = 'glob')
-```
-
-
-### Word Correlations
-
-```{r message=FALSE, warning=FALSE}
-# Convert dfm into relative frequency and find correlations
-dfm_weight(dfmat_sen, scheme = 'prop') %>% 
-    textstat_simil(selection = c('deus', 'evangélico', 'igreja'), 
-                   method = 'correlation', margin = 'features') %>%
-    as.matrix() %>%
-    head(15)
-```
-
-
