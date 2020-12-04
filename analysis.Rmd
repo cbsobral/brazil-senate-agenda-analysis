@@ -5,7 +5,7 @@ output:
     toc: yes
     theme: paper
     toc_float:
-      collapsed: no
+      collapsed: yes
     df_print: kable
 ---
 
@@ -25,8 +25,6 @@ library(quanteda)
 library(quanteda.textmodels)
 library(stm)
 ```
-
-# Notes
 
 # Intro Elections/Brazil/2018/Senate/Research Questions
 
@@ -206,23 +204,25 @@ feat_econ <- data.frame(
 
 # Graph top 30 psi per beta
 feat_econ %>% 
-  top_n(30, psi) %>%  # word fixed-effects
+  top_n(30, psi) %>%  # word fixed-effects == word frequency in all documents
   ggplot(aes(x = beta, y = psi, label = word)) +
   geom_point() +
   geom_text_repel() +
   theme_classic()
 
 # Left
-econ_t <- feat_econ %>% 
-  top_n(-20, beta)
+econ_l <- feat_econ %>% 
+  top_n(200, psi) %>% 
+  top_n(-10, beta)
   #DT::datatable()
 
 # Right
 econ_r <- feat_econ %>% 
-  top_n(20, beta) 
+  top_n(200, psi) %>% 
+  top_n(10, beta) 
   #DT::datatable()
 
-rbind(econ_t, econ_r) %>% 
+rbind(econ_l, econ_r) %>% 
   arrange(beta) %>%    
   mutate(word = factor(word, levels = word)) %>% 
   ggplot(aes(x = word, y = beta)) +
@@ -239,5 +239,3 @@ rbind(econ_t, econ_r) %>%
 ## Analysis Stefania's theme
 
 ## Bonus: Religion
-
-
