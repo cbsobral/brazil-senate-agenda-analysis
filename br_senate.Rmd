@@ -351,6 +351,9 @@ textplot_scale1d(wf_social)
 ```{r}
 # Keyword in context == 'evangélico'
 kwic(corp_sen, pattern = 'evangélico', window = 3, valuetype = 'glob')
+
+# Graph word positions
+#textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
 ```
 
 
