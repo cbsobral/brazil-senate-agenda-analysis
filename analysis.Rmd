@@ -32,7 +32,7 @@ library(stm)
 
 # Data
 
-Acho que vale explicar o que tem nas duas. # carol
+Acho que vale explicar o que tem nas duas dfs. # carol
 
 ```{r}
 # Load senators data frame
@@ -80,7 +80,7 @@ textplot_scale1d(wf)
 ### Senado X Media: Plot wordfish scores x perceived party position by media -- `wiki_partidos`. (Stefania)
 
 ```{r}
-load('../tada/data/wiki_partidos.Rda') # party position per media outlet
+load('data/wiki_partidos.Rda') # party position per media outlet
 ```
 
 ### 2018 Presidential Candidates Manifestos
@@ -122,25 +122,24 @@ t_sen <- data.frame(
 
 t_comp <- merge(t_pres, t_sen, by = 'party')
 
-# arrumar linha -- em 45º mesmo numero nas duas dfs
+# -- interpretação -- todos os partidos acima da linha de 45º estão mais a direita nos programas presidenciais x discursos do senado. PDT é a única exceção. Está mais à esquerda pres. 
 t_comp %>% 
   arrange(theta_pres) %>%    
   mutate(party = factor(party, levels = party)) %>% 
   ggplot(aes(x = theta_sen, y = theta_pres, label = party, col = party)) + 
   geom_point() + 
-  geom_label_repel() +
-  #geom_abline(intercept = 1.2, slope = 1) +
-  #scale_y_continuous(breaks = c(-1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5)) +
-  labs(x = "Theta Senate", y = "Theta President") +
-  theme_classic()
+  geom_label_repel(show.legend = FALSE) +
+  geom_abline() +
+  xlim(-2.5, 2.5) +
+  ylim(-2.5, 2.5) +
+  theme_minimal()
   
-  
+# -- interpretação -- como no gráfico anterior, todos os partidos ficam mais à direita no pres -- slope negativo. Exceção do PDT. 
 t_comp %>% 
   pivot_longer(!party, names_to = 'theta', values_to = 'value') %>% 
-  ggplot(aes(x = theta, y = value, group = party, label = party, col = party)) + 
+  ggplot(aes(x = theta, y = value, group = party, col = party)) + 
   geom_point() + 
-  #geom_label_repel() +
-  geom_line(aes(linetype = party), size = 1) +
+  geom_line(aes(linetype = party), size = 0.5) +
   theme_minimal()
 ```
 
