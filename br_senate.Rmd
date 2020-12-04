@@ -28,8 +28,10 @@ library(stm)
 
 # Ideas
 
-* How parties position themselves in senate speeches x party manifesto -- Wordfish comparison.
+* Plot wordfish scores x perceived party position by media -- `wiki_partidos`.
 * Scale speeches separated by theme (economy, 'societal policy', [...]) -- separation by dictionaries? topic modeling?
+  * Display top 'left' and 'right' words in a bar plot. 
+
 
 # Data
 
@@ -190,9 +192,6 @@ wiki_partidos %>%
 ## Feature Analysis
 
 ```{r}
-# Graph word positions
-textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
-
 # Features usage left/right
 feat <- data.frame(
   word = wf$features,
@@ -202,22 +201,31 @@ feat <- data.frame(
 
 
 # Graph top 30 psi per beta
+# word fixed effects -- capture the fact that some words are used much more often than other words by all actors
 feat %>% 
-  top_n(30, psi) %>%  # word fixed-effects
+  top_n(30, psi) %>%  
   ggplot(aes(x = beta, y = psi, label = word)) +
   geom_point() +
   geom_text_repel() +
   theme_classic()
 
 # Left
-feat %>% 
-  top_n(-30, beta) %>% 
-  DT::datatable()
+feat_t <- feat %>% 
+  top_n(-20, beta)
+  #DT::datatable()
 
 # Right
-feat %>% 
-  top_n(30, beta) %>% 
-  DT::datatable()
+feat_r <- feat %>% 
+  top_n(20, beta) 
+  #DT::datatable()
+
+rbind(feat_t, feat_r) %>% 
+  arrange(beta) %>%    
+  mutate(word = factor(word, levels = word)) %>% 
+  ggplot(aes(x = word, y = beta)) +
+  geom_col() +
+  coord_flip() +
+  theme_classic()
 ```
 
 
@@ -264,9 +272,50 @@ dfmat_econ <- speech_df %>%
 # Wordfish for econ
 dfmat_econ[20, 1]
 dfmat_econ[11, 1]
+
 wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(20, 11), sparse = TRUE)
+
 textplot_scale1d(wf_econ)
 ```
+```{r}
+# Features usage left/right
+feat_econ <- data.frame(
+  word = wf_econ$features,
+  beta = wf_econ$beta,
+  psi = wf_econ$psi,
+  stringsAsFactors = FALSE)
+
+
+# Graph top 30 psi per beta
+feat_econ %>% 
+  top_n(30, psi) %>%  # word fixed-effects
+  ggplot(aes(x = beta, y = psi, label = word)) +
+  geom_point() +
+  geom_text_repel() +
+  theme_classic()
+
+# Left
+econ_t <- feat_econ %>% 
+  top_n(-20, beta)
+  #DT::datatable()
+
+# Right
+econ_r <- feat_econ %>% 
+  top_n(20, beta) 
+  #DT::datatable()
+
+rbind(econ_t, econ_r) %>% 
+  arrange(beta) %>%    
+  mutate(word = factor(word, levels = word)) %>% 
+  ggplot(aes(x = word, y = beta)) +
+  geom_col() +
+  coord_flip() +
+  theme_classic()
+```
+```{r}
+textplot_keyness(textstat_keyness(dfmat_econ, target = dfmat_sen$Partido == 'PR'))
+```
+
 # Social -- só para demonstração
 ```{r}
 # List with documents about social

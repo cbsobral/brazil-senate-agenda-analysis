@@ -82,6 +82,13 @@ docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
 # Corpus
 load('data/corp_exec.Rda')
 
+corp_exec %>% 
+  tokens() %>% 
+  tokens_remove(stopwords("portuguese")) %>% 
+  textstat_collocations(method = "lambda", size = 2) %>% 
+  arrange(-lambda) %>%  
+  top_n(20)
+
 # DFM
 dfmat_exec <- dfm(corp_exec,
   tolower = TRUE,
