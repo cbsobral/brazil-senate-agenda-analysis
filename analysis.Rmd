@@ -129,19 +129,18 @@ t_comp %>%
   ggplot(aes(x = theta_sen, y = theta_pres, label = party, col = party)) + 
   geom_point() + 
   geom_label_repel() +
-  geom_abline(intercept = 1.2, slope = 1) +
-  scale_y_continuous(breaks = c(-1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5)) +
+  #geom_abline(intercept = 1.2, slope = 1) +
+  #scale_y_continuous(breaks = c(-1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5)) +
   labs(x = "Theta Senate", y = "Theta President") +
   theme_classic()
   
   
-
-# gráfico com duas linhas por partido no eixo y
-t_comp %>%
-  arrange(theta_pres) %>%    
-  mutate(party = factor(party, levels = party)) %>% 
-  ggplot(aes(x = theta_pres, y = party)) + 
+t_comp %>% 
+  pivot_longer(!party, names_to = 'theta', values_to = 'value') %>% 
+  ggplot(aes(x = theta, y = value, group = party, label = party, col = party)) + 
   geom_point() + 
+  #geom_label_repel() +
+  geom_line(aes(linetype = party), size = 1) +
   theme_minimal()
 ```
 
