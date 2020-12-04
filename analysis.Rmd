@@ -28,7 +28,38 @@ library(stm)
 
 # Notes
 
-# Intro Senate/Research Questions
+# Intro Elections/Brazil/2018/Senate/Research Questions
+
+# Data
+
+Acho que vale explicar o que tem nas duas.
+
+```{r}
+# Load senators data frame
+load('data/sen_df.Rda')
+
+# Load speeches data frame
+load('data/speech_df.Rda')
+
+# Main Corpus 
+corp_sen <- corpus(speech_df, docid_field = 'CodigoPronunciamento', 
+                   text_field = 'Pronunciamento')
+
+# Main DFM
+dfmat_sen <- dfm(corp_sen,
+  tolower = TRUE,
+  remove_punct = TRUE,
+  remove = stopwords('portuguese'),
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  remove_symbols = TRUE,
+  stem = FALSE,  
+  groups = 'Partido')
+
+dfmat_sen <- dfm_select(dfmat_sen, min_nchar = 2)
+docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
+```
+
 
 # Senate
 
@@ -39,19 +70,131 @@ Características do corpus (número de senadores, número de discursos por estad
 ### UF
 
 
-## Right/Left Senate x Media x Executive Branch
+## Right/Left Positions from Speeches   
 
-### → Senado X Media: Plot wordfish scores x perceived party position by media -- `wiki_partidos`. (Stefania)
+```{r}
+wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
+textplot_scale1d(wf)
+```
+### Senado X Media: Plot wordfish scores x perceived party position by media -- `wiki_partidos`. (Stefania)
+```{r}
+load('../tada/data/wiki_partidos.Rda') # party position per media outlet
+```
 
-### → Senado X programas de governo (Carol)
+### 2018 Presidential Candidates Manifestos
 
+```{r}
+# Load data frame with presidential election manifestos
+load('data/pres_df.Rda')
 
+# Corpus 
+corp_pres <- corpus(pres_df, docid_field = 'id', 
+                   text_field = 'text')
 
-# Themes
+# Main DFM
+dfmat_pres <- dfm(corp_pres,
+  tolower = TRUE,
+  remove_punct = TRUE,
+  remove = stopwords('portuguese'),
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  remove_symbols = TRUE,
+  stem = FALSE)
+```
 
-## Dictionaries
+```{r}
+wf_pres <- textmodel_wordfish(dfmat_pres, dir = c(4, 3), sparse = TRUE) # boulos, bolsonaro
+textplot_scale1d(wf_pres)
+```
+
+# Themes -- Econ, Security, Stefania
+
+## Dictionary 
+
+```{r}
+# Create Dictionary with themes of interest
+theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*'), security = c('segurança'), stefania = c('mulher')))
+
+# Create DFM with theme.lexicon, apply weights and convert to data frame
+theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>% 
+    dfm_weight(scheme = 'prop') %>% 
+    convert('data.frame')
+```
+
 
 ## Analysis Econ
+
+### Data Econ
+```{r}
+# List with documents about economy
+econ_id <- theme_df %>% 
+  filter(economy > 0.95) %>% 
+  pull(doc_id)
+
+# DFM with econ documents
+dfmat_econ <- speech_df %>% 
+  subset(CodigoPronunciamento %in% econ_id) %>% 
+  corpus(docid_field = 'CodigoPronunciamento', text_field = 'Pronunciamento') %>% 
+  dfm(tolower = TRUE,
+      remove_punct = TRUE,
+      remove = stopwords('portuguese'),
+      remove_numbers = TRUE,
+      remove_separators = TRUE,
+      remove_symbols = TRUE,
+      stem = FALSE,  
+      groups = 'Partido')
+```
+
+### Econ Scaling
+```{r}
+# Wordfish for econ
+dfmat_econ[20, 1]
+dfmat_econ[11, 1]
+
+wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(20, 11), sparse = TRUE)
+
+textplot_scale1d(wf_econ)
+```
+
+ 
+```{r}
+# Features usage left/right
+feat_econ <- data.frame(
+  word = wf_econ$features,
+  beta = wf_econ$beta,
+  psi = wf_econ$psi,
+  stringsAsFactors = FALSE)
+
+
+# Graph top 30 psi per beta
+feat_econ %>% 
+  top_n(30, psi) %>%  # word fixed-effects
+  ggplot(aes(x = beta, y = psi, label = word)) +
+  geom_point() +
+  geom_text_repel() +
+  theme_classic()
+
+# Left
+econ_t <- feat_econ %>% 
+  top_n(-20, beta)
+  #DT::datatable()
+
+# Right
+econ_r <- feat_econ %>% 
+  top_n(20, beta) 
+  #DT::datatable()
+
+rbind(econ_t, econ_r) %>% 
+  arrange(beta) %>%    
+  mutate(word = factor(word, levels = word)) %>% 
+  ggplot(aes(x = word, y = beta)) +
+  geom_col() +
+  coord_flip() +
+  theme_classic()
+
+# Graph word positions
+#textplot_scale1d(wf_econ, margin = 'features', highlighted = 'petrobrás')
+```
 
 ## Analysis Security
 

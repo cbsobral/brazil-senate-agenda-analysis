@@ -13,8 +13,12 @@ library(quanteda)
 library(readtext)
 ```
 
+# Senate
 
+Download senators data frame. 
+```{r}
 senators <- sen_senator_list()
+```
 
 Loop to download 17527 individual speeches from senators that will form the larger corpus
 
@@ -109,7 +113,7 @@ sen_corpus_df <- merge(sen_df, speeches_df, by = "CodigoPronunciamento") %>%
   na.omit 
 
 # Save corpus data frame
-save(sen_df, file = "sen_df.Rda")
+save(speech_df, file = "speech_df.Rda")
 ```
 
 ```{r}
@@ -128,5 +132,35 @@ sen_corpus_lemma <- merge(sen_corpus_df, sen_corpus_lemma, by = "CodigoPronuncia
 # Select columns and save corpus_lemma data frame
 sen_corpus_lemma <- sen_corpus_lemma[c(-8)]
 save(sen_corpus_lemma, file = "sen_corpus_lemma.Rda")
+```
+
+
+# Executive
+
+Import government programs for the 2018 presidential election.
+
+```{r}
+pdf_path <- "C:\\Users\\carol\\Desktop\\Fall_2020\\Python\\github_python\\tada\\data\\pres_prog"
+
+# List PDF
+pdfs <- list.files(path = pdf_path, pattern = "*.pdf", full.names = TRUE) 
+
+# Import PDF
+spill_texts <- readtext(pdfs,
+                        docvarsfrom = "filenames", verbosity = TRUE)
+
+```
+
+Add party variable and coallitions
+
+```{r}
+pres_df <- spill_texts %>% 
+  select(id = docvar1, text) 
+
+parties <- readr::read_delim("pres_prog/parties.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+
+pres_df <- merge(pres_df, parties, by = 'id')
+save(pres_df, file = 'pres_df.Rda')
 ```
 
