@@ -26,7 +26,8 @@ library(quanteda.textmodels)
 library(stm)
 ```
 
-# Intro Elections/Brazil/2018/Senate/Research Questions
+# Intro 
+Elections/Brazil/2018/Senate/Research Questions
 
 # Data
 
@@ -64,7 +65,9 @@ docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
 ## General Characteristics Senate
 Características do corpus (número de senadores, número de discursos por estado e gênero)
 → frequência esperada e frequência observada (Ana)
+
 ### Gender
+
 ### UF
 
 
@@ -75,13 +78,14 @@ wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
 textplot_scale1d(wf)
 ```
 
-### Senado X Media: Plot wordfish scores x perceived party position by media -- `wiki_partidos`. (Stefania)
+### Senado X Media
+Plot wordfish scores x perceived party position by media -- `wiki_partidos`. (Stefania)
 
 ```{r}
 load('data/wiki_partidos.Rda') # party position per media outlet
 ```
 
-### 2018 Presidential Candidates Manifestos
+### 2018 Presidential Manifestos
 
 > os valores provavelmente precisam ser normalizados para efeitos de comparação. talvez usar wordscores e predict().
 
