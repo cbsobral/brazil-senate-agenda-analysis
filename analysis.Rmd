@@ -76,7 +76,9 @@ Características do corpus (número de senadores, número de discursos por estad
 wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
 textplot_scale1d(wf)
 ```
+
 ### Senado X Media: Plot wordfish scores x perceived party position by media -- `wiki_partidos`. (Stefania)
+
 ```{r}
 load('../tada/data/wiki_partidos.Rda') # party position per media outlet
 ```
@@ -100,11 +102,13 @@ dfmat_pres <- dfm(corp_pres,
   remove_separators = TRUE,
   remove_symbols = TRUE,
   stem = FALSE)
+
+docnames(dfmat_pres) <- paste(dfmat_pres$name)
 ```
 
 ```{r}
 wf_pres <- textmodel_wordfish(dfmat_pres, dir = c(4, 3), sparse = TRUE) # boulos, bolsonaro
-textplot_scale1d(wf_pres)
+textplot_scale1d(wf_pres) # groups =  docvars(corp_pres, 'party'))
 ```
 
 # Themes -- Econ, Security, Stefania
