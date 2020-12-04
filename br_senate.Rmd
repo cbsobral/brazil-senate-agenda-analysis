@@ -311,12 +311,16 @@ rbind(econ_t, econ_r) %>%
   geom_col() +
   coord_flip() +
   theme_classic()
+
+# Graph word positions
+#textplot_scale1d(wf_econ, margin = 'features', highlighted = 'petrobrás')
 ```
 ```{r}
 textplot_keyness(textstat_keyness(dfmat_econ, target = dfmat_sen$Partido == 'PR'))
 ```
 
-# Social -- só para demonstração
+## Social -- só para demonstração
+
 ```{r}
 # List with documents about social
 social_id <- theme_df %>% 
@@ -351,9 +355,6 @@ textplot_scale1d(wf_social)
 ```{r}
 # Keyword in context == 'evangélico'
 kwic(corp_sen, pattern = 'evangélico', window = 3, valuetype = 'glob')
-
-# Graph word positions
-#textplot_scale1d(wf, margin = 'features', highlighted = 'deus', 'religião')
 ```
 
 

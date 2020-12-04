@@ -1,0 +1,62 @@
+---
+title: 'Brazilian Senate Speeches'
+output: 
+  html_document: 
+    toc: yes
+    theme: paper
+    toc_float:
+      collapsed: no
+    df_print: kable
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggrepel)
+library(ggplot2)
+library(tidyverse)
+library(tidytext)
+library(quanteda)
+library(quanteda.textmodels)
+library(stm)
+```
+
+# Notes
+
+# Intro Senate/Research Questions
+
+# Senate
+
+## General Characteristics Senate
+Características do corpus (número de senadores, número de discursos por estado e gênero)
+→ frequência esperada e frequência observada (Ana)
+### Gender
+### UF
+
+
+## Right/Left Senate x Media x Executive Branch
+
+### → Senado X Media: Plot wordfish scores x perceived party position by media -- `wiki_partidos`. (Stefania)
+
+### → Senado X programas de governo (Carol)
+
+
+
+# Themes
+
+## Dictionaries
+
+## Analysis Econ
+
+## Analysis Security
+
+## Analysis Stefania's theme
+
+## Bonus: Religion
+
+
