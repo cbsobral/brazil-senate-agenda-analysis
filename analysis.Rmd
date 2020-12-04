@@ -85,6 +85,8 @@ load('data/wiki_partidos.Rda') # party position per media outlet
 
 ### 2018 Presidential Candidates Manifestos
 
+> os valores provavelmente precisam ser normalizados para efeitos de comparação. talvez usar wordscores e predict().
+
 ```{r}
 # Load data frame with presidential election manifestos
 load('data/pres_df.Rda')
