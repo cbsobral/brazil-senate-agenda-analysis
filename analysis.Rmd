@@ -32,7 +32,7 @@ library(stm)
 
 # Data
 
-Acho que vale explicar o que tem nas duas.
+Acho que vale explicar o que tem nas duas. # carol
 
 ```{r}
 # Load senators data frame
@@ -108,7 +108,41 @@ docnames(dfmat_pres) <- paste(dfmat_pres$name)
 
 ```{r}
 wf_pres <- textmodel_wordfish(dfmat_pres, dir = c(4, 3), sparse = TRUE) # boulos, bolsonaro
-textplot_scale1d(wf_pres) # groups =  docvars(corp_pres, 'party'))
+#textplot_scale1d(wf_pres) # groups =  docvars(corp_pres, 'party'))
+
+t_pres <- data.frame(
+  party = dfmat_pres$party,
+  theta_pres = wf_pres$theta, 
+  stringsAsFactors = FALSE)
+
+t_sen <- data.frame(
+  party = dfmat_sen$Partido,
+  theta_sen = wf$theta,
+  stringsAsFactors = FALSE) 
+
+t_comp <- merge(t_pres, t_sen, by = 'party')
+
+# arrumar linha -- em 45º mesmo numero nas duas dfs
+t_comp %>% 
+  arrange(theta_pres) %>%    
+  mutate(party = factor(party, levels = party)) %>% 
+  ggplot(aes(x = theta_sen, y = theta_pres, label = party, col = party)) + 
+  geom_point() + 
+  geom_label_repel() +
+  geom_abline(intercept = 1.2, slope = 1) +
+  scale_y_continuous(breaks = c(-1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2, 2.5)) +
+  labs(x = "Theta Senate", y = "Theta President") +
+  theme_classic()
+  
+  
+
+# gráfico com duas linhas por partido no eixo y
+t_comp %>%
+  arrange(theta_pres) %>%    
+  mutate(party = factor(party, levels = party)) %>% 
+  ggplot(aes(x = theta_pres, y = party)) + 
+  geom_point() + 
+  theme_minimal()
 ```
 
 # Themes -- Econ, Security, Stefania
