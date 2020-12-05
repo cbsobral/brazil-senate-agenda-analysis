@@ -237,6 +237,21 @@ rbind(econ_l, econ_r) %>%
 # Graph word positions
 #textplot_scale1d(wf_econ, margin = 'features', highlighted = 'petrobrás')
 ```
+```{r}
+testwords <- c("trabalho", "petrobrás", "auxílio", "previdência", "covid", "desemprego",
+               "emprego")
+
+testscores <- arrange(filter(feat_econ, word %in% testwords),
+                      beta)
+
+ggplot(testscores, aes(beta, psi, label = word)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_text_repel(data = testscores, col = "black") +
+  geom_point(data = testscores) +
+  labs(x = "Word score", y = "Offset parameter") +
+  ggtitle("Estimated Word Positions for Selected Debate Vocabulary",
+          subtitle = "Note: Offset parameter is roughly proportional to word frequency")
+```
 
 ## Analysis Security
 
