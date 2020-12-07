@@ -24,6 +24,7 @@ library(tidytext)
 library(quanteda)
 library(quanteda.textmodels)
 library(stm)
+library(austin)
 ```
 
 # Intro 
@@ -76,6 +77,10 @@ Características do corpus (número de senadores, número de discursos por estad
 ```{r}
 wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
 textplot_scale1d(wf)
+
+theta_sen_wf <- as.data.frame(wf$theta, wf$docs) %>% 
+    rownames_to_column('party') %>%
+    rename(theta_sen_wf = 'wf$theta')
 ```
 
 ### Senado X Media
@@ -87,63 +92,91 @@ load('data/wiki_partidos.Rda') # party position per media outlet
 
 ### 2018 Presidential Manifestos
 
-> os valores provavelmente precisam ser normalizados para efeitos de comparação. talvez usar wordscores e predict().
-
 ```{r}
 # Load data frame with presidential election manifestos
 load('data/pres_df.Rda')
-
-# Corpus 
-corp_pres <- corpus(pres_df, docid_field = 'id', 
-                   text_field = 'text')
-
-# Main DFM
-dfmat_pres <- dfm(corp_pres,
-  tolower = TRUE,
-  remove_punct = TRUE,
-  remove = stopwords('portuguese'),
-  remove_numbers = TRUE,
-  remove_separators = TRUE,
-  remove_symbols = TRUE,
-  stem = FALSE)
-
-docnames(dfmat_pres) <- paste(dfmat_pres$name)
 ```
 
 ```{r}
-wf_pres <- textmodel_wordfish(dfmat_pres, dir = c(4, 3), sparse = TRUE) # boulos, bolsonaro
-#textplot_scale1d(wf_pres) # groups =  docvars(corp_pres, 'party'))
+# list with unique parties from senate speeches
+parties_sen <- unique(speech_df$Partido)
 
-t_pres <- data.frame(
-  party = dfmat_pres$party,
-  theta_pres = wf_pres$theta, 
-  stringsAsFactors = FALSE)
+# create dfmat pres subset only with parties in senate
+dfmat_pres_sub <- pres_df %>% 
+  subset(party %in% parties_sen) %>%  
+  corpus(docid_field = 'party', 
+          text_field = 'text') %>% 
+  dfm(tolower = TRUE,
+      remove_punct = TRUE,
+      remove = stopwords('portuguese'),
+      remove_numbers = TRUE,
+      remove_separators = TRUE,
+      remove_symbols = TRUE,
+      stem = FALSE)
+```
 
-t_sen <- data.frame(
-  party = dfmat_sen$Partido,
-  theta_sen = wf$theta,
-  stringsAsFactors = FALSE) 
+All parties have more extreme values in the presidential manifestos. PT and PDT are more to the left on presidential manifestos, while the remaining parties are more to the right. 
 
-t_comp <- merge(t_pres, t_sen, by = 'party')
+```{r message=FALSE, warning=FALSE}
+# # austin
+# # as wfm
+# wfm_pres <- as.wfm(dfmat_pres_sub, word.margin = 2)
+# 
+# # wordfish pres
+# wfa_pres <- wordfish(wfm_pres, dir = c(6, 2))
+# 
+# # match sen features with pres
+# dfmat_match <- dfm_match(dfmat_sen, featnames(dfmat_pres_sub))
+# 
+# # convert to wfm
+# wfm_match <- as.wfm(dfmat_match, word.margin = 2)
+# 
+# # predict values to senate speeches
+# theta_sen_au <- as.data.frame(predict(wfa_pres, newdata = wfm_match)) %>%
+#   rownames_to_column('party') %>%
+#   rename(theta_sen_au = "predict(wfa_pres, newdata = wfm_match)")
 
-# -- interpretação -- todos os partidos acima da linha de 45º estão mais a direita nos programas presidenciais x discursos do senado. PDT é a única exceção. Está mais à esquerda pres. 
-t_comp %>% 
+load('data/theta/theta_sen_au.Rda')
+
+# # pres scores
+# theta_pres_au <- as.data.frame(wfa_pres$theta, wfa_pres$docs) %>%
+#   rownames_to_column('party') %>%
+#   rename(theta_pres = 'wfa_pres$theta')
+# 
+# # merge dfs -- theta pres and sen
+# theta_ps <- merge(theta_pres_au, theta_sen_au, by = 'party')
+
+# Load data frame with out of sample prediction for senate speeches
+load('data/theta/theta_ps.Rda')
+
+# Compare pres x sen
+theta_ps %>% 
   arrange(theta_pres) %>%    
   mutate(party = factor(party, levels = party)) %>% 
-  ggplot(aes(x = theta_sen, y = theta_pres, label = party, col = party)) + 
+  ggplot(aes(x = theta_pres, y = theta_sen_au, label = party, col = party)) + 
   geom_point() + 
   geom_label_repel(show.legend = FALSE) +
   geom_abline() +
-  xlim(-2.5, 2.5) +
-  ylim(-2.5, 2.5) +
+  xlim(-2.5, 2) +
+  ylim(-2.5, 2) +
   theme_minimal()
-  
-# -- interpretação -- como no gráfico anterior, todos os partidos ficam mais à direita no pres -- slope negativo. Exceção do PDT. 
-t_comp %>% 
-  pivot_longer(!party, names_to = 'theta', values_to = 'value') %>% 
-  ggplot(aes(x = theta, y = value, group = party, col = party)) + 
+```
+
+
+```{r}
+# Compare sen wordfish x sen/pres austin
+theta_sen <- merge(theta_sen_wf, theta_sen_au, by = 'party')
+
+
+theta_sen %>% 
+  arrange(theta_sen_wf) %>%    
+  mutate(party = factor(party, levels = party)) %>% 
+  ggplot(aes(x = theta_sen_wf, y = theta_sen_au, label = party, col = party)) + 
   geom_point() + 
-  geom_line(aes(linetype = party), size = 0.5) +
+  geom_label_repel(show.legend = FALSE) +
+  geom_abline() +
+  xlim(-4, 3) +
+  ylim(-4, 4) +
   theme_minimal()
 ```
 
