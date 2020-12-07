@@ -315,6 +315,9 @@ sort(zeta_wf,dec = T)[1:100]
 
 ```{r}
 # Find meaningful words by party
+parties_pres <- unique(pres_df$party)
+
+
 tidy(dfmat_econ) %>% 
   bind_tf_idf(term, document, count) %>% 
   filter(document %in% parties_pres) %>% 
