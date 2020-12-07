@@ -162,6 +162,7 @@ theta_ps %>%
   theme_minimal()
 ```
 
+Party positions derived from presidential manifestos (using `austin` prediction for out of sample documents) are more centered. Wordfish positions are more polarized. 
 
 ```{r}
 # Compare sen wordfish x sen/pres austin
@@ -177,6 +178,14 @@ theta_sen %>%
   geom_abline() +
   xlim(-4, 3) +
   ylim(-4, 4) +
+  theme_minimal()
+
+
+theta_sen %>% 
+  pivot_longer(!party, names_to = 'theta', values_to = 'value') %>% 
+  ggplot(aes(x = theta, y = value, group = party, col = party)) + 
+  geom_point() + 
+  geom_line(aes(linetype = party), size = 0.5) +
   theme_minimal()
 ```
 
