@@ -195,7 +195,7 @@ theta_sen %>%
 
 ```{r}
 # Create Dictionary with themes of interest
-theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*'), security = c('segurança'), stefania = c('mulher')))
+theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*', 'auxílio'), security = c('segurança'), stefania = c('mulher')))
 
 # Create DFM with theme.lexicon, apply weights and convert to data frame
 theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>% 
@@ -225,6 +225,8 @@ dfmat_econ <- speech_df %>%
       remove_symbols = TRUE,
       stem = FALSE,  
       groups = 'Partido')
+
+dfmat_econ <- dfm_select(dfmat_econ, min_nchar = 2)
 ```
 
 ### Econ Scaling
@@ -279,6 +281,8 @@ rbind(econ_l, econ_r) %>%
 # Graph word positions
 #textplot_scale1d(wf_econ, margin = 'features', highlighted = 'petrobrás')
 ```
+
+
 ```{r}
 testwords <- c("trabalho", "petrobrás", "auxílio", "previdência", "covid", "desemprego",
                "emprego")
@@ -292,8 +296,26 @@ ggplot(testscores, aes(beta, psi, label = word)) +
   geom_point(data = testscores) +
   labs(x = "Word score", y = "Offset parameter") +
   ggtitle("Estimated Word Positions for Selected Debate Vocabulary",
-          subtitle = "Note: Offset parameter is roughly proportional to word frequency")
+          subtitle = "Note: Offset parameter is roughly proportional to word frequency") +
+  theme_minimal()
 ```
+
+
+```{r}
+# Find meaningful words by party
+tidy(dfmat_econ) %>% 
+  bind_tf_idf(term, document, count) %>% 
+  filter(document %in% parties_pres) %>% 
+  arrange(desc(tf_idf)) %>% 
+  group_by(document) %>%
+  slice_max(tf_idf, n = 15) %>%
+  ungroup() %>%
+  ggplot(aes(tf_idf, fct_reorder(term, tf_idf), fill = document)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ document, ncol = 3, scales = "free") +
+  labs(x = "tf-idf", y = NULL)
+```
+
 
 ## Analysis Security
 
