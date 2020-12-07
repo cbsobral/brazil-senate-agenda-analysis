@@ -195,7 +195,7 @@ theta_sen %>%
 
 ```{r}
 # Create Dictionary with themes of interest
-theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*', 'auxílio'), security = c('segurança'), stefania = c('mulher')))
+theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*', 'auxílio', 'desigualdade', 'petróleo', 'petro', 'desigual*', 'custo*', 'capital', 'ações', 'participação', 'aposent*', 'nacionalizar', 'mercado'), security = c('segurança'), stefania = c('mulher')))
 
 # Create DFM with theme.lexicon, apply weights and convert to data frame
 theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>% 
