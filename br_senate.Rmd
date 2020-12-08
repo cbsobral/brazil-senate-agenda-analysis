@@ -186,8 +186,16 @@ textplot_scale1d(wf)
 load('../tada/data/wiki_partidos.Rda')
 wiki_partidos %>% 
   DT::datatable()
-```
 
+```
+```{r}
+# Graph party position based on the media 
+
+#Congresso em Foco - único que tem todos os partidos 
+#O Globo boa categorização mas não tem todos 
+#criar a nossa?
+
+```
 
 ## Feature Analysis
 
@@ -240,7 +248,7 @@ rbind(feat_t, feat_r) %>%
 # -- economy words from policy_agendas_english --
 policy.lexicon <- dictionary(file = 'data/policy_agendas_english.lcd')
 
-theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*'), social = c('mulher*', 'home*', 'famíl*', 'famil*', 'sex*')))
+theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*'), genfam = c('famíl*', 'famil*', 'just*', 'mulher*', 'solteir*', 'sex*', 'pai*', 'mãe', 'filh*', 'abort*', 'criança*', 'abrigo', 'gênero', 'gay', 'kit gay', 'jove*', 'juventude', 'tradicional')))
 
 
 # Create DFM with theme.lexicon, apply weights and convert to data frame
@@ -316,20 +324,20 @@ rbind(econ_t, econ_r) %>%
 #textplot_scale1d(wf_econ, margin = 'features', highlighted = 'petrobrás')
 ```
 ```{r}
-textplot_keyness(textstat_keyness(dfmat_econ, target = dfmat_sen$Partido == 'PR'))
+textplot_keyness(textstat_keyness(dfmat_econ, target = dfmat_econ$Partido == 'PR'))
 ```
 
-## Social -- só para demonstração
+## Social 
 
 ```{r}
-# List with documents about social
-social_id <- theme_df %>% 
-  filter(social > 0.8) %>% 
+# List with documents about gender and family 
+genfam_id <- theme_df %>% 
+  filter(genfam > 0.9) %>% 
   pull(doc_id)
 
-# DFM with social documents
-dfmat_social <- speech_df %>% 
-  subset(CodigoPronunciamento %in% social_id) %>% 
+# DFM with econ documents
+dfmat_genfam <- speech_df %>% 
+  subset(CodigoPronunciamento %in% genfam_id) %>% 
   corpus(docid_field = 'CodigoPronunciamento', text_field = 'Pronunciamento') %>% 
   dfm(tolower = TRUE,
       remove_punct = TRUE,
@@ -341,12 +349,54 @@ dfmat_social <- speech_df %>%
       groups = 'Partido')
 
 # Wordfish for econ
-dfmat_social[18, 1]
-dfmat_social[11, 1]
-wf_social <- textmodel_wordfish(dfmat_social, dir = c(18, 11), sparse = TRUE)
-textplot_scale1d(wf_social)
-```
+dfmat_genfam[20, 1]
+dfmat_genfam[11, 1]
 
+wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(20, 11), sparse = TRUE)
+
+textplot_scale1d(wf_genfam)
+```
+```{r}
+# Features usage left/right
+feat_genfam <- data.frame(
+  word = wf_genfam$features,
+  beta = wf_genfam$beta,
+  psi = wf_genfam$psi,
+  stringsAsFactors = FALSE)
+
+
+# Graph top 30 psi per beta
+feat_genfam %>% 
+  top_n(30, psi) %>%  # word fixed-effects
+  ggplot(aes(x = beta, y = psi, label = word)) +
+  geom_point() +
+  geom_text_repel() +
+  theme_classic()
+
+# Left
+genfam_t <- feat_genfam %>% 
+  top_n(-20, beta)
+  #DT::datatable()
+
+# Right
+genfam_r <- feat_genfam %>% 
+  top_n(20, beta) 
+  #DT::datatable()
+
+rbind(genfam_t, genfam_r) %>% 
+  arrange(beta) %>%    
+  mutate(word = factor(word, levels = word)) %>% 
+  ggplot(aes(x = word, y = beta)) +
+  geom_col() +
+  coord_flip() +
+  theme_classic()
+
+# Graph word positions
+#textplot_scale1d(wf_econ, margin = 'features', highlighted = 'petrobrás')
+```
+```{r}
+textplot_keyness(textstat_keyness(dfmat_genfam, target = dfmat_genfam$Partido == 'PT'))
+```
 
 ## Religion
 
