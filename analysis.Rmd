@@ -385,7 +385,7 @@ dfmat_sec <- speech_df %>%
 
 
 # Wordfish for sec
-# OBSERVAÇÂO: o VINTE DESAPARECEU DA MINHA DFM
+
 dfmat_sec[19, 1]
 dfmat_sec[11, 1]
 
@@ -410,17 +410,20 @@ feat_sec %>%
   geom_text_repel() +
   theme_classic()
 
+
 # Left
-sec_t <- feat_sec %>% 
-  top_n(-20, beta)
+sec_l <- feat_sec %>% 
+  top_n(200, psi) %>% 
+  top_n(-10, beta)
   #DT::datatable()
 
 # Right
 sec_r <- feat_sec %>% 
-  top_n(20, beta) 
+  top_n(200, psi) %>% 
+  top_n(10, beta) 
   #DT::datatable()
 
-rbind(sec_t, sec_r) %>% 
+rbind(sec_l, sec_r) %>% 
   arrange(beta) %>%    
   mutate(word = factor(word, levels = word)) %>% 
   ggplot(aes(x = word, y = beta)) +
@@ -428,12 +431,44 @@ rbind(sec_t, sec_r) %>%
   coord_flip() +
   theme_classic()
 
+
 # Graph word positions
 #textplot_scale1d(wf_sec, margin = 'features', highlighted = 'bandido')
 ```
 
 ```{r}
 textplot_keyness(textstat_keyness(dfmat_sec, target = dfmat_sec$Partido == 'PT'))
+```
+```{r}
+testsec <- c("bandido", "cadeia", "prisão", "vagabundo", "arma", "tiro",
+               "policial")
+
+testsecscores <- arrange(filter(feat_sec, word %in% testsec),
+                      beta)
+
+ggplot(testsecscores, aes(beta, psi, label = word)) +
+  geom_point(color = "grey", alpha = 0.2) +
+  geom_text_repel(data = testsecscores, col = "black") +
+  geom_point(data = testsecscores) +
+  labs(x = "Word score", y = "Offset parameter") +
+  ggtitle("Estimated Word Positions for Selected Debate Vocabulary",
+          subtitle = "Note: Offset parameter is roughly proportional to word frequency") +
+  theme_minimal()
+```
+```{r}
+# Find meaningful words by party
+
+tidy(dfmat_sec) %>% 
+  bind_tf_idf(term, document, count) %>% 
+  filter(document %in% parties_pres) %>% 
+  arrange(desc(tf_idf)) %>% 
+  group_by(document) %>%
+  slice_max(tf_idf, n = 15) %>%
+  ungroup() %>%
+  ggplot(aes(tf_idf, fct_reorder(term, tf_idf), fill = document)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ document, ncol = 3, scales = "free") +
+  labs(x = "tf-idf", y = NULL)
 ```
 
 
