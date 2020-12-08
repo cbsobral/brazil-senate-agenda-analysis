@@ -223,7 +223,7 @@ theta_sen %>%
 
 ```{r}
 # Create Dictionary with themes of interest
-theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*', 'auxílio', 'desigualdade', 'petróleo', 'petro', 'desigual*', 'custo*', 'capital', 'ações', 'participação', 'aposent*', 'nacionalizar', 'mercado'), genfam = c('famíl*', 'famil*', 'just*', 'mulher*', 'solteir*', 'sex*', 'pai*', 'mãe', 'filh*', 'abort*', 'criança*', 'abrigo', 'gênero', 'gay', 'kit gay', 'jove*', 'juventude', 'tradicional', security = c('sequestr*', 'inocent*', 'puni*','condena*','sentença', 'tribunal', 'juiz', 'justiça', 'crim*', 'bandid*', 'criminos*', 'ilícit*', 'infrator*', 'impunidade', 'promotor*', 'instância', 'transitado', 'julgado', 'julgamento', 'bala', 'balead*', 'tiro', 'fuzil', 'arma', 'armamento', 'pistola', 'rifle', 'polícia', 'policial', 'militar', 'cidadão de bem', 'cadeia*', 'prisão', 'prisioneir*', 'investigação', 'intervenção militar', 'UPP', 'segurança pública', '*anticrime', '*anti-crime', 'assassin*', 'ladrão', 'vagabund*', 'saidão', 'condicional', 'progressão de regime', 'réu', 'defensoria', 'estupr*', 'traficante*', 'detenção', 'detent*',  'violência', 'reincidente', 'reincidência', 'delinquente', 'menor', 'maioridade penal', 'drogas', 'entorpecent*'))))
+theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*', 'auxílio', 'desigualdade', 'petróleo', 'petro', 'desigual*', 'custo*', 'capital', 'ações', 'participação', 'aposent*', 'nacionalizar', 'mercado'), genfam = c('famíl*', 'famil*', 'just*', 'mulher*', 'solteir*', 'sex*', 'pai*', 'mãe', 'filh*', 'abort*', 'criança*', 'abrigo', 'gênero', 'gay', 'kit gay', 'jove*', 'juventude', 'tradicional'), security = c('sequestr*', 'inocent*', 'puni*','condena*','sentença', 'tribunal', 'juiz', 'justiça', 'crim*', 'bandid*', 'criminos*', 'ilícit*', 'infrator*', 'impunidade', 'promotor*', 'instância', 'transitado', 'julgado', 'julgamento', 'bala', 'balead*', 'tiro', 'fuzil', 'arma', 'armamento', 'pistola', 'rifle', 'polícia', 'policial', 'militar', 'cidadão de bem', 'cadeia*', 'prisão', 'prisioneir*', 'investigação', 'intervenção militar', 'UPP', 'segurança pública', '*anticrime', '*anti-crime', 'assassin*', 'ladrão', 'vagabund*', 'saidão', 'condicional', 'progressão de regime', 'réu', 'defensoria', 'estupr*', 'traficante*', 'detenção', 'detent*',  'violência', 'reincidente', 'reincidência', 'delinquente', 'menor', 'maioridade penal', 'drogas', 'entorpecent*')))
 
 # Create DFM with theme.lexicon, apply weights and convert to data frame
 theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>% 
@@ -238,7 +238,7 @@ theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>%
 ```{r}
 # List with documents about economy
 econ_id <- theme_df %>% 
-  filter(economy > 0.97) %>% 
+  filter(economy > genfam | economy > security) %>% 
   pull(doc_id)
 
 # DFM with econ documents
@@ -332,7 +332,7 @@ ggplot(testscores, aes(beta, psi, label = word)) +
 # 'Fighting words'
 zeta_wf <- wf_econ$beta*sqrt(exp(wf_econ$psi))
 names(zeta_wf) <- colnames(dfmat_econ)
-sort(zeta_wf,dec = T)[1:100]
+sort(zeta_wf,dec = T)[1:20]
 
 
 # plot(wf_econ$psi,zeta_wf, col=rgb(0,0,0,.5), pch=19, cex=.5)
