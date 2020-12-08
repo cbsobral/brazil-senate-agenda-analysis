@@ -25,16 +25,35 @@ library(quanteda)
 library(quanteda.textmodels)
 library(stm)
 library(austin)
+
 ```
 
-# Intro 
-Elections/Brazil/2018/Senate/Research Questions
+# Introduction 
+  With support of a Party coalition named “Brazil above everything, God above everyone” , Bolsonaro was elected, in 2018, president of Brazil for the 2019-2022 term. Having served as congress representative (“deputado federal”) for the State of Rio de Janeiro since 1991, Bolsonaro reached notoriety for his populist,  sexist, homophobic, anti-human rights and often anti-democratic  political views.
+	After 4 consecutive elections of a left party (“Labour Party”, i.e. “Partido do Trabalhadores” – PT) for the presidency of Brazil, and on the aftermath of a controversial conviction of its most prominent leader -- and front runner in the election polls --  on corruption charges, Bolsonaro benefited from a rise in anti-leftness sentiment and took the leadership of the poll of candidates with a manifesto that was filled with religious/Christian language and that was based on three pillars, that were directly opposed to the agenda of left/progressive groups:
+	
+	(1) Liberalization of economic policy: promising deregulation, privatization and extinction of sectors of the public service;
+	
+	(2) Public Security policy: a criminal reform package meant to harden convictions for crimes; exempt law enforcement officials of liability for any deaths they may cause in service; facilitate the private possession of firearms;
+	
+	(3) Conservative Moral agenda: opposition of sex education in schools; opposition to policies that aim at extending equality of rights for LGBT people; opposition to pregnancy termination, even in the limited circumstances allowed in Brazilian Law (rape; health risk for woman; anencephaly of fetus); reinforcement of gender stereotypical roles.    
+	
+	For this project, we are interested in assessing if, and to what extent, these three axis that constitute Bolsonaro’s political agenda are also resonating in the Brazilian Senate.
+	
+	Brazil’s Senate House is composed of 3 senators per State and the Federal District, totaling 81 senators. Each of their term in office last for 8 years,  but the election cycle happens every 4 years, alternating the elections for 2/3 and 1/3 of the house.  Theoretically speaking, the alternate election cycle should render the Senate house less sensitive to momentary waves that, if salient in a given moment, could heavily influence the course of a presidential election. 
+	
+	In 2018, 2/3 of the Senate chairs were elected (54 senators), while the remaining 1/3 had still half the term in office to complete. 
+	
+	In this project, we analyzed the corpus of Senators’ speeches from the years 2019-2020, focusing on issues associated with these salient dimensions of Bolsonaro’s political plan.
+	
+	Finally, we assess the religious discourse as a separate trend. While the use of religion in political life seems to be at odds with the laicity of Brazilian Constitution, it resonates both with conservative views in Brazil and the general beliefs of the majority of the constituency. We are interested, therefore, in assessing if there is any significant difference in the use of religion by Senators across the RILE spectrum. 
+
 
 # Data
 
 Acho que vale explicar o que tem nas duas dfs. # carol
 
-```{r}
+```{r Data_corpus_DFM}
 # Load senators data frame
 load('data/sen_df.Rda')
 
@@ -74,7 +93,7 @@ Características do corpus (número de senadores, número de discursos por estad
 
 ## Right/Left Positions from Speeches   
 
-```{r}
+```{r RILE_speaches}
 wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
 textplot_scale1d(wf)
 
@@ -86,18 +105,27 @@ theta_sen_wf <- as.data.frame(wf$theta, wf$docs) %>%
 ### Senado X Media
 Plot wordfish scores x perceived party position by media -- `wiki_partidos`. (Stefania)
 
-```{r}
+```{r RILE_media}
 load('data/wiki_partidos.Rda') # party position per media outlet
+
+# Graph party position based on the media 
+
+#Congresso em Foco - único que tem todos os partidos 
+#O Globo boa categorização mas não tem todos 
+#criar a nossa?
+
+
+
 ```
 
 ### 2018 Presidential Manifestos
 
-```{r}
+```{r Presidential_Campaign}
 # Load data frame with presidential election manifestos
 load('data/pres_df.Rda')
 ```
 
-```{r}
+```{r RILE_SenatevPresidential}
 # list with unique parties from senate speeches
 parties_sen <- unique(speech_df$Partido)
 
@@ -189,13 +217,13 @@ theta_sen %>%
   theme_minimal()
 ```
 
-# Themes -- Econ, Security, Stefania
+# Themes -- Economy, Security, Gender & Family
 
 ## Dictionary 
 
 ```{r}
 # Create Dictionary with themes of interest
-theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*', 'auxílio', 'desigualdade', 'petróleo', 'petro', 'desigual*', 'custo*', 'capital', 'ações', 'participação', 'aposent*', 'nacionalizar', 'mercado'), security = c('segurança'), stefania = c('mulher')))
+theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*', 'auxílio', 'desigualdade', 'petróleo', 'petro', 'desigual*', 'custo*', 'capital', 'ações', 'participação', 'aposent*', 'nacionalizar', 'mercado'), genfam = c('famíl*', 'famil*', 'just*', 'mulher*', 'solteir*', 'sex*', 'pai*', 'mãe', 'filh*', 'abort*', 'criança*', 'abrigo', 'gênero', 'gay', 'kit gay', 'jove*', 'juventude', 'tradicional', security = c('sequestr*', 'inocent*', 'puni*','condena*','sentença', 'tribunal', 'juiz', 'justiça', 'crim*', 'bandid*', 'criminos*', 'ilícit*', 'infrator*', 'impunidade', 'promotor*', 'instância', 'transitado', 'julgado', 'julgamento', 'bala', 'balead*', 'tiro', 'fuzil', 'arma', 'armamento', 'pistola', 'rifle', 'polícia', 'policial', 'militar', 'cidadão de bem', 'cadeia*', 'prisão', 'prisioneir*', 'investigação', 'intervenção militar', 'UPP', 'segurança pública', '*anticrime', '*anti-crime', 'assassin*', 'ladrão', 'vagabund*', 'saidão', 'condicional', 'progressão de regime', 'réu', 'defensoria', 'estupr*', 'traficante*', 'detenção', 'detent*',  'violência', 'reincidente', 'reincidência', 'delinquente', 'menor', 'maioridade penal', 'drogas', 'entorpecent*'))))
 
 # Create DFM with theme.lexicon, apply weights and convert to data frame
 theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>% 
@@ -334,6 +362,156 @@ tidy(dfmat_econ) %>%
 
 ## Analysis Security
 
-## Analysis Stefania's theme
+## Security
+
+```{r Security_analysis}
+# List with documents about security
+sec_id <- theme_df %>% 
+  filter(security > 0.9) %>% 
+  pull(doc_id)
+
+# DFM with sec documents
+dfmat_sec <- speech_df %>% 
+  subset(CodigoPronunciamento %in% sec_id) %>% 
+  corpus(docid_field = 'CodigoPronunciamento', text_field = 'Pronunciamento') %>% 
+  dfm(tolower = TRUE,
+      remove_punct = TRUE,
+      remove = stopwords('portuguese'),
+      remove_numbers = TRUE,
+      remove_separators = TRUE,
+      remove_symbols = TRUE,
+      stem = FALSE,  
+      groups = 'Partido')
+
+
+# Wordfish for sec
+# OBSERVAÇÂO: o VINTE DESAPARECEU DA MINHA DFM
+dfmat_sec[19, 1]
+dfmat_sec[11, 1]
+
+wf_sec <- textmodel_wordfish(dfmat_sec, dir = c(20, 11), sparse = TRUE)
+
+textplot_scale1d(wf_sec)
+```
+```{r}
+# Features usage left/right
+feat_sec <- data.frame(
+  word = wf_sec$features,
+  beta = wf_sec$beta,
+  psi = wf_sec$psi,
+  stringsAsFactors = FALSE)
+
+
+# Graph top 30 psi per beta
+feat_sec %>% 
+  top_n(30, psi) %>%  # word fixed-effects
+  ggplot(aes(x = beta, y = psi, label = word)) +
+  geom_point() +
+  geom_text_repel() +
+  theme_classic()
+
+# Left
+sec_t <- feat_sec %>% 
+  top_n(-20, beta)
+  #DT::datatable()
+
+# Right
+sec_r <- feat_sec %>% 
+  top_n(20, beta) 
+  #DT::datatable()
+
+rbind(sec_t, sec_r) %>% 
+  arrange(beta) %>%    
+  mutate(word = factor(word, levels = word)) %>% 
+  ggplot(aes(x = word, y = beta)) +
+  geom_col() +
+  coord_flip() +
+  theme_classic()
+
+# Graph word positions
+#textplot_scale1d(wf_sec, margin = 'features', highlighted = 'bandido')
+```
+
+```{r}
+textplot_keyness(textstat_keyness(dfmat_sec, target = dfmat_sec$Partido == 'PT'))
+```
+
+
+
+## Analysis Gender & Family
+
+```{r}
+# List with documents about gender and family 
+genfam_id <- theme_df %>% 
+  filter(genfam > 0.9) %>% 
+  pull(doc_id)
+
+# DFM with econ documents
+dfmat_genfam <- speech_df %>% 
+  subset(CodigoPronunciamento %in% genfam_id) %>% 
+  corpus(docid_field = 'CodigoPronunciamento', text_field = 'Pronunciamento') %>% 
+  dfm(tolower = TRUE,
+      remove_punct = TRUE,
+      remove = stopwords('portuguese'),
+      remove_numbers = TRUE,
+      remove_separators = TRUE,
+      remove_symbols = TRUE,
+      stem = FALSE,  
+      groups = 'Partido')
+
+# Wordfish for econ
+dfmat_genfam[20, 1]
+dfmat_genfam[11, 1]
+
+wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(20, 11), sparse = TRUE)
+
+textplot_scale1d(wf_genfam)
+```
+```
+```{r}
+# Features usage left/right
+feat_genfam <- data.frame(
+  word = wf_genfam$features,
+  beta = wf_genfam$beta,
+  psi = wf_genfam$psi,
+  stringsAsFactors = FALSE)
+
+
+# Graph top 30 psi per beta
+feat_genfam %>% 
+  top_n(30, psi) %>%  # word fixed-effects
+  ggplot(aes(x = beta, y = psi, label = word)) +
+  geom_point() +
+  geom_text_repel() +
+  theme_classic()
+
+# Left
+genfam_t <- feat_genfam %>% 
+  top_n(-20, beta)
+  #DT::datatable()
+
+# Right
+genfam_r <- feat_genfam %>% 
+  top_n(20, beta) 
+  #DT::datatable()
+
+rbind(genfam_t, genfam_r) %>% 
+  arrange(beta) %>%    
+  mutate(word = factor(word, levels = word)) %>% 
+  ggplot(aes(x = word, y = beta)) +
+  geom_col() +
+  coord_flip() +
+  theme_classic()
+
+# Graph word positions
+#textplot_scale1d(wf_econ, margin = 'features', highlighted = 'petrobrás')
+```
+
+```{r}
+textplot_keyness(textstat_keyness(dfmat_genfam, target = dfmat_genfam$Partido == 'PT'))
+```
+
+
+
 
 ## Bonus: Religion
