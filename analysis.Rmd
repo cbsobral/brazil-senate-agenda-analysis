@@ -238,7 +238,7 @@ theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>%
 ```{r}
 # List with documents about economy
 econ_id <- theme_df %>% 
-  filter(economy > genfam | economy > security) %>% 
+  filter(economy > genfam & economy > security) %>% 
   pull(doc_id)
 
 # DFM with econ documents
@@ -367,7 +367,7 @@ tidy(dfmat_econ) %>%
 ```{r Security_analysis}
 # List with documents about security
 sec_id <- theme_df %>% 
-  filter(security > 0.9) %>% 
+  filter(security > genfam & security> economy) %>% 
   pull(doc_id)
 
 # DFM with sec documents
@@ -389,7 +389,7 @@ dfmat_sec <- speech_df %>%
 dfmat_sec[19, 1]
 dfmat_sec[11, 1]
 
-wf_sec <- textmodel_wordfish(dfmat_sec, dir = c(20, 11), sparse = TRUE)
+wf_sec <- textmodel_wordfish(dfmat_sec, dir = c(19, 11), sparse = TRUE)
 
 textplot_scale1d(wf_sec)
 ```
@@ -443,7 +443,7 @@ textplot_keyness(textstat_keyness(dfmat_sec, target = dfmat_sec$Partido == 'PT')
 ```{r}
 # List with documents about gender and family 
 genfam_id <- theme_df %>% 
-  filter(genfam > 0.9) %>% 
+  filter(genfam > security & genfam > economy) %>% 
   pull(doc_id)
 
 # DFM with econ documents
