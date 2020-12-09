@@ -28,7 +28,8 @@ library(austin)
 
 ```
 
-# Introduction 
+# Introduction
+<style> body {text-align: justify} </style>
   With support of a Party coalition named “Brazil above everything, God above everyone” , Bolsonaro was elected, in 2018, president of Brazil for the 2019-2022 term. Having served as congress representative (“deputado federal”) for the State of Rio de Janeiro since 1991, Bolsonaro reached notoriety for his populist,  sexist, homophobic, anti-human rights and often anti-democratic  political views.
 	After 4 consecutive elections of a left party (“Labour Party”, i.e. “Partido do Trabalhadores” – PT) for the presidency of Brazil, and on the aftermath of a controversial conviction of its most prominent leader -- and front runner in the election polls --  on corruption charges, Bolsonaro benefited from a rise in anti-leftness sentiment and took the leadership of the poll of candidates with a manifesto that was filled with religious/Christian language and that was based on three pillars, that were directly opposed to the agenda of left/progressive groups:
 	
@@ -113,12 +114,9 @@ load('data/wiki_partidos.Rda') # party position per media outlet
 #Congresso em Foco - único que tem todos os partidos 
 #O Globo boa categorização mas não tem todos 
 #criar a nossa?
-
-
-
 ```
 
-### 2018 Presidential Manifestos
+### 2018's Presidential Manifestos
 
 ```{r Presidential_Campaign}
 # Load data frame with presidential election manifestos
@@ -297,9 +295,6 @@ rbind(econ_l, econ_r) %>%
   geom_col() +
   coord_flip() +
   theme_classic()
-
-# Graph word positions
-#textplot_scale1d(wf_econ, margin = 'features', highlighted = 'petrobrás')
 ```
 
 
@@ -409,10 +404,6 @@ rbind(sec_l, sec_r) %>%
   geom_col() +
   coord_flip() +
   theme_classic()
-
-
-# Graph word positions
-#textplot_scale1d(wf_sec, margin = 'features', highlighted = 'bandido')
 ```
 
 ```{r}
@@ -511,9 +502,6 @@ rbind(genfam_l, genfam_r) %>%
   geom_col() +
   coord_flip() +
   theme_classic()
-
-# Graph word positions
-#textplot_scale1d(wf_econ, margin = 'features', highlighted = 'petrobrás')
 ```
 
 ```{r}
