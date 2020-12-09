@@ -54,8 +54,6 @@ Finally, we assess the religious discourse as a separate trend. While the use of
 
 # Data
 
-Acho que vale explicar o que tem nas duas dfs. # carol
-
 ```{r Data_corpus_DFM}
 # Load senators data frame
 load('data/sen_df.Rda')
@@ -350,7 +348,6 @@ sort(zeta_wf,dec = T)[1:20]
 ```
 
 
-
 ```{r}
 # Find meaningful words by party
 parties_pres <- unique(pres_df$party)
@@ -450,23 +447,6 @@ ggplot(scores_sec, aes(beta, psi, label = word)) +
   ggtitle('Estimated Word Positions for Selected Debate Vocabulary') +
   theme_minimal()
 ```
-
-```{r}
-# Find meaningful words by party
-tidy(dfmat_sec) %>% 
-  bind_tf_idf(term, document, count) %>% 
-  filter(document %in% parties_pres) %>% 
-  arrange(desc(tf_idf)) %>% 
-  group_by(document) %>%
-  slice_max(tf_idf, n = 15) %>%
-  ungroup() %>%
-  ggplot(aes(tf_idf, fct_reorder(term, tf_idf), fill = document)) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ document, ncol = 3, scales = 'free') +
-  labs(x = 'tf-idf', y = NULL)
-```
-
-
 
 ## Analysis Gender & Family
 
