@@ -543,7 +543,7 @@ rbind(genfam_t, genfam_r) %>%
 ```
 
 ```{r}
-textplot_keyness(textstat_keyness(dfmat_genfam, target = dfmat_genfam$Partido == 'PT'))
+#textplot_keyness(textstat_keyness(dfmat_genfam, target = dfmat_genfam$Partido == 'PT'))
 ```
 
 
