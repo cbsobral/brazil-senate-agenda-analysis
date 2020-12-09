@@ -162,7 +162,7 @@ All parties have more extreme values in the presidential manifestos. PT and PDT 
 # # predict values to senate speeches
 # theta_sen_au <- as.data.frame(predict(wfa_pres, newdata = wfm_match)) %>%
 #   rownames_to_column('party') %>%
-#   rename(theta_sen_au = "predict(wfa_pres, newdata = wfm_match)")
+#   rename(theta_sen_au = 'predict(wfa_pres, newdata = wfm_match)')
 
 load('data/theta/theta_sen_au.Rda')
 
@@ -312,19 +312,19 @@ rbind(econ_l, econ_r) %>%
 
 
 ```{r}
-testwords <- c("trabalho", "petrobrás", "auxílio", "previdência", "covid", "desemprego",
-               "emprego")
+testwords <- c('trabalho', 'petrobrás', 'auxílio', 'previdência', 'covid', 'desemprego',
+               'emprego')
 
 testscores <- arrange(filter(feat_econ, word %in% testwords),
                       beta)
 
 ggplot(testscores, aes(beta, psi, label = word)) +
-  geom_point(color = "grey", alpha = 0.2) +
-  geom_text_repel(data = testscores, col = "black") +
+  geom_point(color = 'grey', alpha = 0.2) +
+  geom_text_repel(data = testscores, col = 'black') +
   geom_point(data = testscores) +
-  labs(x = "Word score", y = "Offset parameter") +
-  ggtitle("Estimated Word Positions for Selected Debate Vocabulary",
-          subtitle = "Note: Offset parameter is roughly proportional to word frequency") +
+  labs(x = 'Word score', y = 'Word Frequency') +
+  ggtitle('Estimated Word Positions for Selected Debate Vocabulary',
+          subtitle = 'Note: Word Frequency is roughly proportional to word frequency') +
   theme_minimal()
 ```
 
@@ -355,8 +355,8 @@ tidy(dfmat_econ) %>%
   ungroup() %>%
   ggplot(aes(tf_idf, fct_reorder(term, tf_idf), fill = document)) +
   geom_col(show.legend = FALSE) +
-  facet_wrap(~ document, ncol = 3, scales = "free") +
-  labs(x = "tf-idf", y = NULL)
+  facet_wrap(~ document, ncol = 3, scales = 'free') +
+  labs(x = 'tf-idf', y = NULL)
 ```
 
 
@@ -439,25 +439,25 @@ rbind(sec_l, sec_r) %>%
 ```{r}
 textplot_keyness(textstat_keyness(dfmat_sec, target = dfmat_sec$Partido == 'PT'))
 ```
+
 ```{r}
-testsec <- c("bandido", "cadeia", "prisão", "vagabundo", "arma", "tiro",
-               "policial")
+testsec <- c('bandido', 'cadeia', 'prisão', 'vagabundo', 'arma', 'tiro',
+               'policial')
 
 testsecscores <- arrange(filter(feat_sec, word %in% testsec),
                       beta)
 
 ggplot(testsecscores, aes(beta, psi, label = word)) +
-  geom_point(color = "grey", alpha = 0.2) +
-  geom_text_repel(data = testsecscores, col = "black") +
+  geom_point(color = 'grey', alpha = 0.2) +
+  geom_text_repel(data = testsecscores, col = 'black') +
   geom_point(data = testsecscores) +
-  labs(x = "Word score", y = "Offset parameter") +
-  ggtitle("Estimated Word Positions for Selected Debate Vocabulary",
-          subtitle = "Note: Offset parameter is roughly proportional to word frequency") +
+  labs(x = 'Word Score', y = 'Word Frequency') +
+  ggtitle('Estimated Word Positions for Selected Debate Vocabulary')
   theme_minimal()
 ```
+
 ```{r}
 # Find meaningful words by party
-
 tidy(dfmat_sec) %>% 
   bind_tf_idf(term, document, count) %>% 
   filter(document %in% parties_pres) %>% 
@@ -467,8 +467,8 @@ tidy(dfmat_sec) %>%
   ungroup() %>%
   ggplot(aes(tf_idf, fct_reorder(term, tf_idf), fill = document)) +
   geom_col(show.legend = FALSE) +
-  facet_wrap(~ document, ncol = 3, scales = "free") +
-  labs(x = "tf-idf", y = NULL)
+  facet_wrap(~ document, ncol = 3, scales = 'free') +
+  labs(x = 'tf-idf', y = NULL)
 ```
 
 
@@ -494,15 +494,17 @@ dfmat_genfam <- speech_df %>%
       stem = FALSE,  
       groups = 'Partido')
 
+dfmat_genfam <- dfm_trim(dfmat_genfam, min_termfreq = 2, min_docfreq = 2)
+
 # Wordfish for econ
-dfmat_genfam[20, 1]
+dfmat_genfam[19, 1]
 dfmat_genfam[11, 1]
 
-wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(20, 11), sparse = TRUE)
+wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(19, 11), sparse = TRUE)
 
 textplot_scale1d(wf_genfam)
 ```
-```
+
 ```{r}
 # Features usage left/right
 feat_genfam <- data.frame(
@@ -521,16 +523,18 @@ feat_genfam %>%
   theme_classic()
 
 # Left
-genfam_t <- feat_genfam %>% 
+genfam_l <- feat_genfam %>% 
+  top_n(200, psi) %>% 
   top_n(-20, beta)
   #DT::datatable()
 
 # Right
 genfam_r <- feat_genfam %>% 
+  top_n(200, psi) %>% 
   top_n(20, beta) 
   #DT::datatable()
 
-rbind(genfam_t, genfam_r) %>% 
+rbind(genfam_l, genfam_r) %>% 
   arrange(beta) %>%    
   mutate(word = factor(word, levels = word)) %>% 
   ggplot(aes(x = word, y = beta)) +
@@ -545,8 +549,3 @@ rbind(genfam_t, genfam_r) %>%
 ```{r}
 #textplot_keyness(textstat_keyness(dfmat_genfam, target = dfmat_genfam$Partido == 'PT'))
 ```
-
-
-
-
-## Bonus: Religion
