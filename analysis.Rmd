@@ -127,34 +127,35 @@ load('data/pres_df.Rda')
 
 ```{r RILE_SenatevPresidential}
 # list with unique parties from senate speeches
-parties_sen <- unique(speech_df$Partido)
+#parties_sen <- unique(speech_df$Partido)
 
-# create dfmat pres subset only with parties in senate
-dfmat_pres_sub <- pres_df %>% 
-  subset(party %in% parties_sen) %>%  
-  corpus(docid_field = 'party', 
-          text_field = 'text') %>% 
-  dfm(tolower = TRUE,
-      remove_punct = TRUE,
-      remove = stopwords('portuguese'),
-      remove_numbers = TRUE,
-      remove_separators = TRUE,
-      remove_symbols = TRUE,
-      stem = FALSE)
+# Main Corpus 
+corp_pres <- corpus(pres_df, docid_field = 'party', 
+                   text_field = 'text')
+
+# Main DFM
+dfmat_pres <- dfm(corp_pres,
+  tolower = TRUE,
+  remove_punct = TRUE,
+  remove = stopwords('portuguese'),
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  remove_symbols = TRUE,
+  stem = FALSE)
 ```
 
 All parties have more extreme values in the presidential manifestos. PT and PDT are more to the left on presidential manifestos, while the remaining parties are more to the right. 
 
 ```{r message=FALSE, warning=FALSE}
-# # austin
-# # as wfm
-# wfm_pres <- as.wfm(dfmat_pres_sub, word.margin = 2)
+# austin
+# as wfm
+# wfm_pres <- as.wfm(dfmat_pres, word.margin = 2)
 # 
 # # wordfish pres
-# wfa_pres <- wordfish(wfm_pres, dir = c(6, 2))
+# wfa_pres <- wordfish(wfm_pres, dir = c(4, 3)) # PSOL, PSL
 # 
 # # match sen features with pres
-# dfmat_match <- dfm_match(dfmat_sen, featnames(dfmat_pres_sub))
+# dfmat_match <- dfm_match(dfmat_sen, featnames(dfmat_pres))
 # 
 # # convert to wfm
 # wfm_match <- as.wfm(dfmat_match, word.margin = 2)
