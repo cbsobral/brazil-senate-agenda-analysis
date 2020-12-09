@@ -29,24 +29,27 @@ library(austin)
 
 # Introduction
 <style> body {text-align: justify} </style>
-  With support of a Party coalition named “Brazil above everything, God above everyone” , Bolsonaro was elected, in 2018, president of Brazil for the 2019-2022 term. Having served as congress representative (“deputado federal”) for the State of Rio de Janeiro since 1991, Bolsonaro reached notoriety for his populist,  sexist, homophobic, anti-human rights and often anti-democratic  political views.
-	After 4 consecutive elections of a left party (“Labour Party”, i.e. “Partido do Trabalhadores” – PT) for the presidency of Brazil, and on the aftermath of a controversial conviction of its most prominent leader -- and front runner in the election polls --  on corruption charges, Bolsonaro benefited from a rise in anti-leftness sentiment and took the leadership of the poll of candidates with a manifesto that was filled with religious/Christian language and that was based on three pillars, that were directly opposed to the agenda of left/progressive groups:
+With support of a Party coalition named “Brazil above everything, God above everyone” , Bolsonaro was elected, in 2018, president of Brazil for the 2019-2022 term. Having served as congress representative (“deputado federal”) for the State of Rio de Janeiro since 1991, Bolsonaro reached notoriety for his populist,  sexist, homophobic, anti-human rights and often anti-democratic  political views.
+
+After 4 consecutive elections of a left party (“Labour Party”, i.e. “Partido do Trabalhadores” – PT) for the presidency of Brazil, and on the aftermath of a controversial conviction of its most prominent leader -- and front runner in the election polls --  on corruption charges, Bolsonaro benefited from a rise in anti-leftness sentiment and took the leadership of the poll of candidates with a manifesto that was filled with religious/Christian language and that was based on three pillars, that were directly opposed to the agenda of left/progressive groups:
 	
-	(1) Liberalization of economic policy: promising deregulation, privatization and extinction of sectors of the public service;
+1. Liberalization of economic policy: promising deregulation, privatization and extinction of sectors of the public service;
 	
-	(2) Public Security policy: a criminal reform package meant to harden convictions for crimes; exempt law enforcement officials of liability for any deaths they may cause in service; facilitate the private possession of firearms;
+2. Public Security policy: a criminal reform package meant to harden convictions for crimes; exempt law enforcement officials of liability for any deaths they may cause in service; facilitate the private possession of firearms;
 	
-	(3) Conservative Moral agenda: opposition of sex education in schools; opposition to policies that aim at extending equality of rights for LGBT people; opposition to pregnancy termination, even in the limited circumstances allowed in Brazilian Law (rape; health risk for woman; anencephaly of fetus); reinforcement of gender stereotypical roles.    
+3. Conservative Moral agenda: opposition of sex education in schools; opposition to policies that aim at extending equality of rights for LGBT people; opposition to pregnancy termination, even in the limited circumstances allowed in Brazilian Law (rape; health risk for woman; anencephaly of fetus); reinforcement of gender stereotypical roles.    
 	
-	For this project, we are interested in assessing if, and to what extent, these three axis that constitute Bolsonaro’s political agenda are also resonating in the Brazilian Senate.
 	
-	Brazil’s Senate House is composed of 3 senators per State and the Federal District, totaling 81 senators. Each of their term in office last for 8 years,  but the election cycle happens every 4 years, alternating the elections for 2/3 and 1/3 of the house.  Theoretically speaking, the alternate election cycle should render the Senate house less sensitive to momentary waves that, if salient in a given moment, could heavily influence the course of a presidential election. 
 	
-	In 2018, 2/3 of the Senate chairs were elected (54 senators), while the remaining 1/3 had still half the term in office to complete. 
+For this project, we are interested in assessing if, and to what extent, these three axis that constitute Bolsonaro’s political agenda are also resonating in the Brazilian Senate.
 	
-	In this project, we analyzed the corpus of Senators’ speeches from the years 2019-2020, focusing on issues associated with these salient dimensions of Bolsonaro’s political plan.
+Brazil’s Senate House is composed of 3 senators per State and the Federal District, totaling 81 senators. Each of their term in office last for 8 years,  but the election cycle happens every 4 years, alternating the elections for 2/3 and 1/3 of the house.  Theoretically speaking, the alternate election cycle should render the Senate house less sensitive to momentary waves that, if salient in a given moment, could heavily influence the course of a presidential election. 
 	
-	Finally, we assess the religious discourse as a separate trend. While the use of religion in political life seems to be at odds with the laicity of Brazilian Constitution, it resonates both with conservative views in Brazil and the general beliefs of the majority of the constituency. We are interested, therefore, in assessing if there is any significant difference in the use of religion by Senators across the RILE spectrum. 
+In 2018, 2/3 of the Senate chairs were elected (54 senators), while the remaining 1/3 had still half the term in office to complete. 
+	
+In this project, we analyzed the corpus of Senators’ speeches from the years 2019-2020, focusing on issues associated with these salient dimensions of Bolsonaro’s political plan.
+	
+Finally, we assess the religious discourse as a separate trend. While the use of religion in political life seems to be at odds with the laicity of Brazilian Constitution, it resonates both with conservative views in Brazil and the general beliefs of the majority of the constituency. We are interested, therefore, in assessing if there is any significant difference in the use of religion by Senators across the RILE spectrum. 
 
 
 # Data
