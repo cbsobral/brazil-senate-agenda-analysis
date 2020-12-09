@@ -25,7 +25,6 @@ library(quanteda)
 library(quanteda.textmodels)
 library(stm)
 library(austin)
-
 ```
 
 # Introduction
@@ -95,25 +94,49 @@ Características do corpus (número de senadores, número de discursos por estad
 ## Right/Left Positions from Speeches   
 
 ```{r RILE_speaches}
+# Wordfish
 wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
 textplot_scale1d(wf)
 
+# Data frame with Wordsfish party positions
 theta_sen_wf <- as.data.frame(wf$theta, wf$docs) %>% 
     rownames_to_column('party') %>%
     rename(theta_sen_wf = 'wf$theta')
 ```
 
 ### Senado X Media
-Plot wordfish scores x perceived party position by media -- `wiki_partidos`. (Stefania)
 
-```{r RILE_media}
-load('data/wiki_partidos.Rda') # party position per media outlet
+Plot wordfish scores x perceived party position by media -- `cemf_2019`.
 
-# Graph party position based on the media 
+```{r RILE_media, message=FALSE, warning=FALSE}
+load('data/cemf_2019.Rda') # party position per media outlet
 
-#Congresso em Foco - único que tem todos os partidos 
-#O Globo boa categorização mas não tem todos 
-#criar a nossa?
+cemf_2019 <-  cemf_2019 %>% 
+  mutate(score = if_else(pos == 'centro', 0, if_else(pos == 'esquerda', -1, 1)))
+
+media_pos <-  merge(theta_sen_wf, cemf_2019, by = 'party')
+
+
+media_pos %>% 
+  arrange(score) %>%    
+  mutate(party = factor(party, levels = party)) %>% 
+  ggplot(aes(x = theta_sen_wf, y = score, label = party, col = party)) + 
+  geom_point() + 
+  geom_label_repel(show.legend = FALSE) +
+  geom_abline() +
+  xlim(-2.5, 2) +
+  ylim(-2.5, 2) +
+  theme_minimal()
+
+
+media_pos %>% 
+  select(party, score, theta_sen_wf) %>% 
+  pivot_longer(!party, names_to = 'theta', values_to = 'value') %>% 
+  ggplot(aes(x = theta, y = value, group = party, col = party)) + 
+  geom_point() + 
+  geom_line(aes(linetype = party), size = 0.5) +
+  theme_minimal()
+
 ```
 
 ### 2018's Presidential Manifestos
