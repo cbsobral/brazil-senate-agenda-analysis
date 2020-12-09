@@ -304,19 +304,18 @@ rbind(econ_l, econ_r) %>%
 
 
 ```{r}
-testwords <- c('trabalho', 'petrobrás', 'auxílio', 'previdência', 'covid', 'desemprego',
-               'emprego')
+words_econ <- c('trabalho', 'petrobrás', 'auxílio', 'previdência', 'covid', 'desemprego',
+               'emprego', 'amazônia')
 
-testscores <- arrange(filter(feat_econ, word %in% testwords),
+scores_econ <- arrange(filter(feat_econ, word %in% words_econ),
                       beta)
 
-ggplot(testscores, aes(beta, psi, label = word)) +
+ggplot(scores_econ, aes(beta, psi, label = word)) +
   geom_point(color = 'grey', alpha = 0.2) +
-  geom_text_repel(data = testscores, col = 'black') +
-  geom_point(data = testscores) +
-  labs(x = 'Word score', y = 'Word Frequency') +
-  ggtitle('Estimated Word Positions for Selected Debate Vocabulary',
-          subtitle = 'Note: Word Frequency is roughly proportional to word frequency') +
+  geom_text_repel(data = scores_econ, col = 'black') +
+  geom_point(data = scores_econ) +
+  labs(x = 'Word Score', y = 'Word Frequency') +
+  ggtitle('Estimated Word Positions for Selected Debate Vocabulary') +
   theme_minimal()
 ```
 
@@ -421,18 +420,18 @@ rbind(sec_l, sec_r) %>%
 ```
 
 ```{r}
-testsec <- c('bandido', 'cadeia', 'prisão', 'vagabundo', 'arma', 'tiro',
+words_sec <- c('bandido', 'cadeia', 'prisão', 'vagabundo', 'arma', 'tiro',
                'policial')
 
-testsecscores <- arrange(filter(feat_sec, word %in% testsec),
+scores_sec <- arrange(filter(feat_sec, word %in% words_sec),
                       beta)
 
-ggplot(testsecscores, aes(beta, psi, label = word)) +
+ggplot(scores_sec, aes(beta, psi, label = word)) +
   geom_point(color = 'grey', alpha = 0.2) +
-  geom_text_repel(data = testsecscores, col = 'black') +
-  geom_point(data = testsecscores) +
+  geom_text_repel(data = scores_sec, col = 'black') +
+  geom_point(data = scores_sec) +
   labs(x = 'Word Score', y = 'Word Frequency') +
-  ggtitle('Estimated Word Positions for Selected Debate Vocabulary')
+  ggtitle('Estimated Word Positions for Selected Debate Vocabulary') +
   theme_minimal()
 ```
 
