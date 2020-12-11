@@ -84,12 +84,130 @@ docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
 # Senate
 
 ## General Characteristics Senate
-Características do corpus (número de senadores, número de discursos por estado e gênero)
-→ frequência esperada e frequência observada (Ana)
 
-### Gender
+Considering the 26 States plus the Federal District each are entitled to three senates, we would expect the sen_df to have 81 senators, however, Roraima (RR) had one of its senators (Chico Rodrigues) suspended from his activities following an investigation on diversion of resources. For the purposes of this analysis, we will consider the Federal District a State.
+
+The Senate api only displays current senators' speeches, which is why Roraima only have 2 senators and the corpus only comprises speeches from 80 senators.
+
+In what concerns gender, although females are the majority of Brazilian population (97 males per 100 females), women represent only 1/8 of the composition of the Senate House. 18 States have only male Senators (including Roraima, with only 2 Senators); 8 States have 2 Male Senators and 1 Female Senator and 1 State has 2 Female Senators and 1 Male Senator (Mato Grosso do Sul - MS)
+
+In terms of party distribution, 16 parties have at least one senator in the present term. MDB, PSD and PODEMOS are the parties with largest representation, holding 13, 12 and 10 senators, respectively. All of PSD Senators are male, while PSD and PODEMOS have 1 Female Senator each. 
+
+Looking into distribution of gender per party, 9 of these parties have at least one Female Senator; but only 1 party (PP) has 2 Female Senators.
+
+
+
+```{r Characteristics_Senate}
+
+sen_df %>% 
+  count(state) %>% 
+  arrange(n)
+
+
+sen_df %>% 
+  count(gender) %>% 
+  arrange(n)
+
+
+sen_df %>% 
+  group_by(state, gender) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  DT::datatable()
+
+
+sen_df %>% 
+  count(party_abbr) %>% 
+  arrange(n)
+
+sen_df %>% 
+  group_by(party_abbr, gender) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  arrange(desc(n)) %>% 
+  DT::datatable()
+
+
+```
+
+Considering these characteristics of the Senate House, let's see if the speech distribution follows the same pattern, i.e., let's check if Females' are responsible for 1/8 of the total speeches, how speeches are distributed among these 16 Parties, and among the 27 States.
+
+
+```{r Gender_Senate}
+
+# parties precisa ponderar a frequência esperada pelo número de senadores de cada partido
+#group by party criar nova coluna mutate soma do número de senadores do partido/80
+
+
+sen_df %>% 
+  group_by(party_abbr, gender) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(prop = (n / sum(n))*100) %>% 
+  DT::datatable()
+
+
+# Plot senators by gender
+gender_sen <- sen_df %>% 
+  group_by(party_abbr, gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(party_abbr, n)) +
+  geom_col(aes(fill = gender)) +
+  ylab('# Senators') +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90)) 
+
+# Plot speeches by gender
+gender_speech <- speech_df %>% 
+  group_by(Partido, Gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(Partido, n)) +
+  geom_col(aes(fill = Gender)) +
+  ylab('# Speeches') +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90))
+
+# Plot speeches by gender = Plot expected frequency on the back
+
+gender_speech <- speech_df %>% 
+  group_by(Gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(n, Gender)) +
+  geom_col(aes(fill = Gender)) +
+  ylab('# Speeches') +
+  coord_flip()+
+  theme_classic()
+  
+gridExtra::grid.arrange(gender_sen, gender_speech)
+```
+
 
 ### UF
+```{r UF_Senate}
+
+# h line intercept y media dos speaches
+
+state_sen <- sen_df %>% 
+  group_by(state, gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(state, n)) +
+  geom_col(aes(fill = gender)) +
+  ylab('# Senators') +
+  theme_classic() 
+
+# Plot speeches by state
+state_speech <- speech_df %>% 
+  group_by(UfParlamentarNaData, Gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(UfParlamentarNaData, n)) +
+  geom_col(aes(fill = Gender)) +
+  ylab('# Speeches') +
+  theme_classic() 
+
+gridExtra::grid.arrange(state_sen, state_speech)
+
+```
 
 
 ## Right/Left Positions from Speeches   
@@ -146,9 +264,13 @@ media_pos %>%
 load('data/pres_df.Rda')
 ```
 
+
+
+
 ```{r RILE_SenatevPresidential}
 # list with unique parties from senate speeches
 #parties_sen <- unique(speech_df$Partido)
+
 
 # Main Corpus 
 corp_pres <- corpus(pres_df, docid_field = 'party', 
@@ -165,7 +287,30 @@ dfmat_pres <- dfm(corp_pres,
   stem = FALSE)
 ```
 
+
 All parties have more extreme values in the presidential manifestos. PT and PDT are more to the left on presidential manifestos, while the remaining parties are more to the right. 
+
+```{r Topic_Model_Manifestos}
+
+topic_pres <- stm(dfmat_pres, K= 4, seed = 12345)
+labelTopics(topic_pres)
+
+```
+
+
+```{r Topic_Model_Senate}
+## erro no topic senado: Error in hpbcpp(optim.out$par, doc_ct = doc.ct, mu = mu, siginv = siginv, : chol(): decomposition failed
+
+topic_sen_stm <- asSTMCorpus(dfmat_sen)
+topic_sen <- stm (documents = topic_sen_stm$documents, vocab = topic_sen_stm$vocab,
+           K = 4, data = topic_sen_stm$data,
+           seed = 12345)
+labelTopics(topic_sen)
+
+```
+
+
+
 
 ```{r message=FALSE, warning=FALSE}
 # austin
