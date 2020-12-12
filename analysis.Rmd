@@ -97,7 +97,6 @@ Looking into distribution of gender per party, 9 of these parties have at least 
 
 
 ```{r Characteristics_Senate}
-
 sen_df %>% 
   count(state) %>% 
   arrange(n)
@@ -522,7 +521,7 @@ tidy(dfmat_econ) %>%
 
 ## Analysis Security
 
-## Security
+## Data Sec
 
 ```{r Security_analysis}
 # List with documents about security
@@ -604,6 +603,7 @@ ggplot(scores_sec, aes(beta, psi, label = word)) +
 
 ## Analysis Gender & Family
 
+## Data Genfam
 ```{r}
 # List with documents about gender and family 
 genfam_id <- theme_df %>% 
@@ -664,4 +664,19 @@ rbind(genfam_l, genfam_r) %>%
 
 ```{r}
 #textplot_keyness(textstat_keyness(dfmat_genfam, target = dfmat_genfam$Partido == 'PT'))
+```
+
+```{r}
+words_genfam <- c('kit gay', 'just*', 'tradicional', 'mulher', 'gênero', 'feminis*', 'juventude', 'gay', 'jovem', 'família')
+
+scores_genfam <- arrange(filter(feat_genfam, word %in% words_genfam),
+                      beta)
+
+ggplot(scores_genfam, aes(beta, psi, label = word)) +
+  geom_point(color = 'grey', alpha = 0.2) +
+  geom_text_repel(data = scores_genfam, col = 'black') +
+  geom_point(data = scores_genfam) +
+  labs(x = 'Word Score', y = 'Word Frequency') +
+  ggtitle('Estimated Word Positions for Selected Debate Vocabulary') +
+  theme_minimal()
 ```
