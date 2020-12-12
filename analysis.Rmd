@@ -97,6 +97,7 @@ Looking into distribution of gender per party, 9 of these parties have at least 
 
 
 ```{r Characteristics_Senate}
+
 sen_df %>% 
   count(state) %>% 
   arrange(n)
@@ -113,7 +114,7 @@ sen_df %>%
   
 sen_df %>% 
   count(party_abbr) %>% 
-  arrange(n)
+  arrange(desc(n))
 
 sen_df %>% 
   group_by(party_abbr, gender) %>% 
@@ -122,13 +123,11 @@ sen_df %>%
   arrange(desc(n)) 
 ```
 
-Considering these characteristics of the Senate House, let's see if the speech distribution follows the same pattern, i.e., let's check if Females' are responsible for 1/8 of the total speeches, how speeches are distributed among these 16 Parties, and among the 27 States.
+Considering these characteristics of the Senate House, let's see if the speech distribution follows the same pattern, i.e., let's check if Females' are responsible for 1/8 of the total speeches, and how speeches are distributed among these 16 Parties, and among the 27 States.
 
+### Gender
 
 ```{r Gender_Senate, message=FALSE, warning=FALSE}
-
-# parties precisa ponderar a frequência esperada pelo número de senadores de cada partido
-#group by party criar nova coluna mutate soma do número de senadores do partido/80
 
 
 sen_df %>% 
@@ -158,17 +157,6 @@ gender_speech <- speech_df %>%
   theme_classic() +
   theme(axis.text.x = element_text(angle = 90))
 
-# Plot speeches by gender = Plot expected frequency on the back
-
-gender_speech <- speech_df %>% 
-  group_by(Gender) %>% 
-  summarise(n = n()) %>%
-  ggplot(aes(n, Gender)) +
-  geom_col(aes(fill = Gender)) +
-  ylab('# Speeches') +
-  coord_flip() +
-  theme_classic()
-  
 gridExtra::grid.arrange(gender_sen, gender_speech)
 
 # expected frequency of speeches per gender -- based on the number of  senators
@@ -196,18 +184,66 @@ merge(expected, observed, by = 'Gender') %>%
   theme_minimal()
 ```
 
+We see that women represent 12.5% of the Senate, but are responsible only for 8.79% of the speeches. This result seems consistent with indicators for gender inequality in Brazil, and their effects on women in the workplace.
 
-### UF
+
+### Parties
+
+```{r Parties_Senate, message=FALSE, warning=FALSE}
+sen_df %>% 
+  group_by(party_abbr) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  mutate(prop_part = (n / sum(n))*100) 
+
+
+# Plot senators by party
+party_sen <- sen_df %>% 
+  group_by(party_abbr, gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(party_abbr, n)) +
+  geom_col(aes(fill = gender)) +
+  ylab('Number of Senators') +
+  xlab('Parties in Senate')+
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90)) 
+
+# Plot speeches by party
+party_speech <- speech_df %>% 
+  group_by(Partido, Gender) %>% 
+  summarise(n = n()) %>%
+  ggplot(aes(Partido, n)) +
+  geom_col(aes(fill = Gender)) +
+  ylab('Speeches (2019 & 2020)') +
+  xlab('Parties in Senate')+
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90))
+
+gridExtra::grid.arrange(party_sen, party_speech)
+
+sum(sen_df$party_abbr== "PT")/80
+
+sum(speech_df$Partido =="PT")/5188
+```
+
+In what concerns the distribution of speeches per party, we expected MDB, PODEMOS and PSD to have a higher number of speeches, as they account for a larger percentage of the Senate House. What we find out, in fact, is that PT, with only 6 Senators (8% of the Senate House) has 1097 speeches (21% of the speeches). PT was the runner-off party of the 2018 elections and was the party elected for the presidential elections of 2002, 2006, 2010 and 2014. This finding might indicate a higher opposition to Bolsonaro's agenda within the Senate corpus.
+
+### States
+
+Our dataset is composed of 5188 speeches given by 80 Senators of 27 States.
+Assuming each Senator uses speech opportunities equally, we would expect each State to have around 192 speeches. Let's see if this checks out.
+
+
 ```{r UF_Senate}
 
-# h line intercept y media dos speaches
 
 state_sen <- sen_df %>% 
   group_by(state) %>% 
   summarise(n = n()) %>%
   ggplot(aes(state, n)) +
   geom_col(fill = "#00BFC4") +
-  ylab('# Senators') +
+  ylab('Senators per State') +
+  xlab('States of Brazil')+
   theme_classic() 
 
 # Plot speeches by state
@@ -216,12 +252,19 @@ state_speech <- speech_df %>%
   summarise(n = n()) %>%
   ggplot(aes(UfParlamentarNaData, n)) +
   geom_col(fill = "#F8766D") +
-  ylab('# Speeches') +
+  geom_hline(yintercept=192, linetype='dotted', col = 'blue')+
+  ylab('Speeches (2019 & 2020)') +
+  xlab('States of Brazil')+
   theme_classic() 
 
 gridExtra::grid.arrange(state_sen, state_speech)
 
 ```
+
+What we see, in fact, is that Senators coming from some States, such as RS, PE, DF and AP far exceed the expected average of speeches; at the same time, Senators from PB, AC and RJ seem not to have spoken as much as their peers in the period of 2019 and 2020. 
+
+This might indicate that the items relevant for the agenda of the States that have more speeches might bear higher weight in the corpus.
+
 
 
 ## Right/Left Positions from Speeches   
@@ -309,11 +352,11 @@ All parties have more extreme values in the presidential manifestos. PT and PDT 
 ```{r Topic_Model_Senate}
 ## erro no topic senado: Error in hpbcpp(optim.out$par, doc_ct = doc.ct, mu = mu, siginv = siginv, : chol(): decomposition failed
 
-topic_sen_stm <- asSTMCorpus(dfmat_sen)
-topic_sen <- stm(documents = topic_sen_stm$documents, vocab = topic_sen_stm$vocab, 4,
-                 data = topic_sen_stm$data, seed = 123)
+#topic_sen_stm <- asSTMCorpus(dfmat_sen)
+#topic_sen <- stm(documents = topic_sen_stm$documents, vocab = topic_sen_stm$vocab, 4,
+                 #data = topic_sen_stm$data, seed = 123)
 
-labelTopics(topic_sen)
+#labelTopics(topic_sen)
 
 ```
 
