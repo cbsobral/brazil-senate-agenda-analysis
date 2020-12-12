@@ -310,11 +310,11 @@ All parties have more extreme values in the presidential manifestos. PT and PDT 
 ```{r Topic_Model_Senate}
 ## erro no topic senado: Error in hpbcpp(optim.out$par, doc_ct = doc.ct, mu = mu, siginv = siginv, : chol(): decomposition failed
 
-# topic_sen_stm <- asSTMCorpus(dfmat_sen)
-# topic_sen <- stm(documents = topic_sen_stm$documents, vocab = topic_sen_stm$vocab,
-#            K = 4, data = topic_sen_stm$data, seed = 12345)
-# 
-# labelTopics(topic_sen)
+topic_sen_stm <- asSTMCorpus(dfmat_sen)
+topic_sen <- stm(documents = topic_sen_stm$documents, vocab = topic_sen_stm$vocab, 4,
+                 data = topic_sen_stm$data, seed = 123)
+
+labelTopics(topic_sen)
 
 ```
 
