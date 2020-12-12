@@ -126,7 +126,7 @@ sen_df %>%
 Considering these characteristics of the Senate House, let's see if the speech distribution follows the same pattern, i.e., let's check if Females' are responsible for 1/8 of the total speeches, how speeches are distributed among these 16 Parties, and among the 27 States.
 
 
-```{r Gender_Senate}
+```{r Gender_Senate, message=FALSE, warning=FALSE}
 
 # parties precisa ponderar a frequência esperada pelo número de senadores de cada partido
 #group by party criar nova coluna mutate soma do número de senadores do partido/80
@@ -188,10 +188,6 @@ observed <- speech_df  %>%
 
 merge(expected, observed, by = 'Gender') %>% 
   select(Gender, prop_sen, prop_speech) %>% 
-   pivot_longer(!Gender, names_to = 'Proportion', values_to = 'Value')
-
-merge(expected, observed, by = 'Gender') %>% 
-  select(Gender, prop_sen, prop_speech) %>% 
   pivot_longer(!Gender, names_to = 'Proportion', values_to = 'Value') %>% 
   mutate(across(is.numeric, ~ round(., 2))) %>% 
   ggplot(aes(Value, Proportion, group = Gender, fill = Gender, label = Value)) +
@@ -208,19 +204,19 @@ merge(expected, observed, by = 'Gender') %>%
 # h line intercept y media dos speaches
 
 state_sen <- sen_df %>% 
-  group_by(state, gender) %>% 
+  group_by(state) %>% 
   summarise(n = n()) %>%
   ggplot(aes(state, n)) +
-  geom_col(aes(fill = gender)) +
+  geom_col(fill = "#00BFC4") +
   ylab('# Senators') +
   theme_classic() 
 
 # Plot speeches by state
 state_speech <- speech_df %>% 
-  group_by(UfParlamentarNaData, Gender) %>% 
+  group_by(UfParlamentarNaData) %>% 
   summarise(n = n()) %>%
   ggplot(aes(UfParlamentarNaData, n)) +
-  geom_col(aes(fill = Gender)) +
+  geom_col(fill = "#F8766D") +
   ylab('# Speeches') +
   theme_classic() 
 
