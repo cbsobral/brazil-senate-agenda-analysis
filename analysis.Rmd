@@ -23,7 +23,7 @@ library(tidyverse)
 library(tidytext)
 library(quanteda)
 library(quanteda.textmodels)
-library(stm)
+library(topicmodels)
 library(austin)
 ```
 
@@ -94,79 +94,19 @@ In terms of party distribution, 16 parties have at least one senator in the pres
 
 Looking into distribution of gender per party, 9 of these parties have at least one Female Senator; but only 1 party (PP) has 2 Female Senators.
 
-
-
-```{r Characteristics_Senate}
-
-sen_df %>% 
-  count(state) %>% 
-  arrange(n)
-
-sen_df %>% 
-  count(gender) %>% 
-  arrange(n)
-
-sen_df %>% 
-  group_by(state, gender) %>% 
-  summarise(n = n()) %>% 
-  ungroup() %>% 
-  arrange(desc(n))
-  
-sen_df %>% 
-  count(party_abbr) %>% 
-  arrange(desc(n))
-
-sen_df %>% 
-  group_by(party_abbr, gender) %>% 
-  summarise(n = n()) %>% 
-  ungroup() %>% 
-  arrange(desc(n)) 
-```
-
 Considering these characteristics of the Senate House, let's see if the speech distribution follows the same pattern, i.e., let's check if Females' are responsible for 1/8 of the total speeches, and how speeches are distributed among these 16 Parties, and among the 27 States.
 
 ### Gender
 
 ```{r Gender_Senate, message=FALSE, warning=FALSE}
-
-
-sen_df %>% 
-  group_by(party_abbr, gender) %>% 
-  summarise(n = n()) %>% 
-  ungroup() %>% 
-  mutate(prop = (n / sum(n))*100) 
-
-
-# Plot senators by gender
-gender_sen <- sen_df %>% 
-  group_by(party_abbr, gender) %>% 
-  summarise(n = n()) %>%
-  ggplot(aes(party_abbr, n)) +
-  geom_col(aes(fill = gender)) +
-  ylab('# Senators') +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 90)) 
-
-# Plot speeches by gender
-gender_speech <- speech_df %>% 
-  group_by(Partido, Gender) %>% 
-  summarise(n = n()) %>%
-  ggplot(aes(Partido, n)) +
-  geom_col(aes(fill = Gender)) +
-  ylab('# Speeches') +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 90))
-
-gridExtra::grid.arrange(gender_sen, gender_speech)
-
-# expected frequency of speeches per gender -- based on the number of  senators
+# Expected frequency of speeches per gender -- based on the number of  senators
 expected <-  sen_df %>% 
   group_by(gender) %>% 
   summarise(n = n()) %>% 
   mutate(prop = (n / sum(n))*100) %>% 
   rename(n_sen = n, prop_sen = prop, Gender = gender)
 
-# observed frequency of speeches
+# Observed frequency of speeches
 observed <- speech_df  %>% 
   group_by(Gender) %>% 
   summarise(n = n()) %>% 
@@ -190,61 +130,64 @@ We see that women represent 12.5% of the Senate, but are responsible only for 8.
 ### Parties
 
 ```{r Parties_Senate, message=FALSE, warning=FALSE}
-sen_df %>% 
-  group_by(party_abbr) %>% 
-  summarise(n = n()) %>% 
-  ungroup() %>% 
-  mutate(prop_part = (n / sum(n))*100) 
-
-
 # Plot senators by party
 party_sen <- sen_df %>% 
-  group_by(party_abbr, gender) %>% 
+  group_by(party_abbr) %>% 
   summarise(n = n()) %>%
   ggplot(aes(party_abbr, n)) +
-  geom_col(aes(fill = gender)) +
+  geom_col(fill = "#00BFC4") +
   ylab('Number of Senators') +
-  xlab('Parties in Senate')+
+  xlab('Parties in Senate') +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 90)) 
 
 # Plot speeches by party
 party_speech <- speech_df %>% 
-  group_by(Partido, Gender) %>% 
+  group_by(Partido) %>% 
   summarise(n = n()) %>%
   ggplot(aes(Partido, n)) +
-  geom_col(aes(fill = Gender)) +
+  geom_col(fill = "#F8766D") +
   ylab('Speeches (2019 & 2020)') +
-  xlab('Parties in Senate')+
+  xlab('Parties in Senate') +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 90))
 
 gridExtra::grid.arrange(party_sen, party_speech)
+```
+```{r message=FALSE, warning=FALSE}
+n_speeches <- speech_df %>% 
+  group_by(Partido) %>% 
+  summarise(Speeches = n()) %>%
+  mutate(Prop_Speeches = round((Speeches / sum(Speeches))*100, 2))
 
-sum(sen_df$party_abbr== "PT")/80
+n_senators <- sen_df %>% 
+  rename(Partido = 'party_abbr') %>% 
+  group_by(Partido) %>% 
+  summarise(Senators = n()) %>%
+  mutate(Prop_Senators = (Senators / sum(Senators))*100) 
 
-sum(speech_df$Partido =="PT")/5188
+
+merge(n_speeches, n_senators, by = 'Partido') %>% 
+  select(Partido, Prop_Senators, Prop_Speeches) %>% 
+  arrange(desc(Prop_Speeches))
 ```
 
 In what concerns the distribution of speeches per party, we expected MDB, PODEMOS and PSD to have a higher number of speeches, as they account for a larger percentage of the Senate House. What we find out, in fact, is that PT, with only 6 Senators (8% of the Senate House) has 1097 speeches (21% of the speeches). PT was the runner-off party of the 2018 elections and was the party elected for the presidential elections of 2002, 2006, 2010 and 2014. This finding might indicate a higher opposition to Bolsonaro's agenda within the Senate corpus.
 
 ### States
 
-Our dataset is composed of 5188 speeches given by 80 Senators of 27 States.
-Assuming each Senator uses speech opportunities equally, we would expect each State to have around 192 speeches. Let's see if this checks out.
+Our data set is composed of 5188 speeches given by 80 Senators of 27 States. Assuming each Senator uses speech opportunities equally, we would expect each State to have around 192 speeches. Let's see if this checks out.
 
 
-```{r UF_Senate}
-
-
+```{r UF_Senate, message=FALSE, warning=FALSE}
 state_sen <- sen_df %>% 
   group_by(state) %>% 
   summarise(n = n()) %>%
   ggplot(aes(state, n)) +
   geom_col(fill = "#00BFC4") +
   ylab('Senators per State') +
-  xlab('States of Brazil')+
-  theme_classic() 
+  xlab('States of Brazil') +
+  theme_classic()  
 
 # Plot speeches by state
 state_speech <- speech_df %>% 
@@ -252,19 +195,17 @@ state_speech <- speech_df %>%
   summarise(n = n()) %>%
   ggplot(aes(UfParlamentarNaData, n)) +
   geom_col(fill = "#F8766D") +
-  geom_hline(yintercept=192, linetype='dotted', col = 'blue')+
+  geom_hline(yintercept = 192, linetype = 'dotted', col = 'blue') +
   ylab('Speeches (2019 & 2020)') +
-  xlab('States of Brazil')+
+  xlab('States of Brazil') +
   theme_classic() 
 
 gridExtra::grid.arrange(state_sen, state_speech)
-
 ```
 
 What we see, in fact, is that Senators coming from some States, such as RS, PE, DF and AP far exceed the expected average of speeches; at the same time, Senators from PB, AC and RJ seem not to have spoken as much as their peers in the period of 2019 and 2020. 
 
 This might indicate that the items relevant for the agenda of the States that have more speeches might bear higher weight in the corpus.
-
 
 
 ## Right/Left Positions from Speeches   
@@ -290,10 +231,7 @@ load('data/cemf_2019.Rda') # party position per media outlet
 cemf_2019 <-  cemf_2019 %>% 
   mutate(score = if_else(pos == 'centro', 0, if_else(pos == 'esquerda', -1, 1)))
 
-media_pos <-  merge(theta_sen_wf, cemf_2019, by = 'party')
-
-
-media_pos %>% 
+merge(theta_sen_wf, cemf_2019, by = 'party') %>% 
   arrange(score) %>%    
   mutate(party = factor(party, levels = party)) %>% 
   ggplot(aes(x = theta_sen_wf, y = score, label = party, col = party)) + 
@@ -302,16 +240,10 @@ media_pos %>%
   geom_abline() +
   xlim(-2.5, 2) +
   ylim(-2.5, 2) +
-  theme_minimal()
-
-
-media_pos %>% 
-  select(party, score, theta_sen_wf) %>% 
-  pivot_longer(!party, names_to = 'theta', values_to = 'value') %>% 
-  ggplot(aes(x = theta, y = value, group = party, col = party)) + 
-  geom_point() + 
-  geom_line(aes(linetype = party), size = 0.5) +
-  theme_minimal()
+  ylab('Media Position') +
+  xlab('Wordfish Position') +
+  theme_minimal() +
+  theme(legend.position = "none") 
 ```
 
 ### 2018's Presidential Manifestos
@@ -323,11 +255,11 @@ load('data/pres_df.Rda')
 
 
 ```{r RILE_SenatevPresidential}
-# Main Corpus 
+# Corpus Presidential Speeches
 corp_pres <- corpus(pres_df, docid_field = 'party', 
                    text_field = 'text')
 
-# Main DFM
+# DFM 
 dfmat_pres <- dfm(corp_pres,
   tolower = TRUE,
   remove_punct = TRUE,
@@ -336,88 +268,11 @@ dfmat_pres <- dfm(corp_pres,
   remove_separators = TRUE,
   remove_symbols = TRUE,
   stem = FALSE)
-```
 
+dfmat_pres <- dfm_select(dfmat_pres, min_nchar = 2)
+```
 
 All parties have more extreme values in the presidential manifestos. PT and PDT are more to the left on presidential manifestos, while the remaining parties are more to the right. 
-
-```{r Topic_Model_Manifestos}
-library(topicmodels)
-
-lda_pres <- LDA(dfmat_pres, k = 6, control = list(seed = 123))
-
-topics_pres <- tidy(lda_pres, matrix = "beta")
-
-top_terms_pres <- topics_pres %>%
-  group_by(topic) %>%
-  top_n(20, beta) %>%
-  ungroup() %>%
-  arrange(topic, -beta) %>% 
-  arrange(desc(beta))
-top_terms_pres
-
-
-#graph result -- also in graph.R
-top_terms_pres %>%
-  mutate(term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(term, beta, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  coord_flip() +
-  scale_x_reordered()
-top_terms_pres
-
-#gamma --  XX% of the words in document X that were generated from topic X
-gamma_pres <- tidy(lda_pres, matrix = "gamma")
-
-#table higher gamma per project
-gamma_pres %>% 
-  group_by(document) %>% 
-  slice_max(gamma, n = 3, with_ties = FALSE) %>% 
-  filter(gamma > 0.4) %>% 
-  arrange(topic)
-
-
-```
-
-
-```{r Topic_Model_Senate}
-lda_sen <- LDA(dfmat_sen, k = 6, control = list(seed = 123))
-
-topics_sen <- tidy(lda_sen, matrix = "beta")
-
-top_terms_sen <- topics_sen %>%
-  group_by(topic) %>%
-  top_n(20, beta) %>%
-  ungroup() %>%
-  arrange(topic, -beta) %>% 
-  arrange(desc(beta))
-top_terms_sen
-
-
-#graph result -- also in graph.R
-top_terms_sen %>%
-  mutate(term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(term, beta, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  coord_flip() +
-  scale_x_reordered()
-top_terms_sen
-
-#gamma --  XX% of the words in document X that were generated from topic X
-gamma_sen <- tidy(lda_sen, matrix = "gamma")
-
-#table higher gamma per project
-gamma_sen %>% 
-  group_by(document) %>% 
-  slice_max(gamma, n = 3, with_ties = FALSE) %>% 
-  filter(gamma > 0.4) %>% 
-  arrange(topic)
-
-```
-
-
 
 
 ```{r message=FALSE, warning=FALSE}
@@ -460,39 +315,77 @@ theta_ps %>%
   geom_point() + 
   geom_label_repel(show.legend = FALSE) +
   geom_abline() +
-  xlim(-2.5, 2) +
-  ylim(-2.5, 2) +
-  theme_minimal()
+  xlim(-2, 2) +
+  ylim(-2, 2) +
+  ylab('Position from Presidential Corpus') +
+  xlab('Position from Senate Corpus') +
+  theme_minimal() +
+  theme(legend.position = "none") 
 ```
 
 Party positions derived from presidential manifestos (using `austin` prediction for out of sample documents) are more centered. Wordfish positions are more polarized. 
 
 ```{r}
 # Compare sen wordfish x sen/pres austin
-theta_sen <- merge(theta_sen_wf, theta_sen_au, by = 'party')
-
-
-theta_sen %>% 
+merge(theta_sen_wf, theta_sen_au, by = 'party') %>% 
   arrange(theta_sen_wf) %>%    
   mutate(party = factor(party, levels = party)) %>% 
   ggplot(aes(x = theta_sen_wf, y = theta_sen_au, label = party, col = party)) + 
   geom_point() + 
   geom_label_repel(show.legend = FALSE) +
   geom_abline() +
-  xlim(-4, 3) +
-  ylim(-4, 4) +
-  theme_minimal()
-
-
-theta_sen %>% 
-  pivot_longer(!party, names_to = 'theta', values_to = 'value') %>% 
-  ggplot(aes(x = theta, y = value, group = party, col = party)) + 
-  geom_point() + 
-  geom_line(aes(linetype = party), size = 0.5) +
-  theme_minimal()
+  xlim(-3, 3) +
+  ylim(-3, 3) +
+  ylab('Position from Presidential Corpus') +
+  xlab('Position from Senate Corpus') +
+  theme_minimal() +
+  theme(legend.position = "none") 
 ```
 
-# Themes -- Economy, Security, Gender & Family
+
+### Topic Model Presidential Manifestos
+
+```{r Topic_Model_Manifestos}
+lda_pres <- LDA(dfmat_pres, k = 6, control = list(seed = 123))
+
+topics_pres <- tidy(lda_pres, matrix = "beta")
+
+# Top words per topic
+topics_pres %>%
+  group_by(topic) %>%
+  top_n(15, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>% 
+  arrange(desc(beta)) %>% 
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered()
+```
+
+
+```{r}
+# gamma --  probability of the words in document X that were generated from topic X
+gamma_pres <- tidy(lda_pres, matrix = "gamma")
+
+# table higher gamma per project
+gamma_pres %>% 
+  group_by(document) %>% 
+  slice_max(gamma, n = 3, with_ties = TRUE) %>% 
+  filter(gamma > 0.8) %>% 
+  arrange(topic) %>% 
+  rename(Party = 'document', Topic = 'topic', Gamma = 'gamma')
+```
+
+
+```{r Topic_Model_Senate}
+```
+
+# Themes
+
+Economy, Security and Gender & Family. 
 
 ## Dictionary 
 
@@ -507,9 +400,10 @@ theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>%
 ```
 
 
-## Analysis Econ
+## Analysis Econonomy
 
-### Data Econ
+### Data Econonmy
+
 ```{r}
 # List with documents about economy
 econ_id <- theme_df %>% 
@@ -532,18 +426,20 @@ dfmat_econ <- speech_df %>%
 dfmat_econ <- dfm_select(dfmat_econ, min_nchar = 2)
 ```
 
-### Econ Scaling
+### Economy Scaling
+
 ```{r}
 # Wordfish for econ
-dfmat_econ[20, 1]
+dfmat_econ[19, 1]
 dfmat_econ[11, 1]
 
-wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(20, 11), sparse = TRUE)
+wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(19, 11), sparse = TRUE) # PT and PR
 
 textplot_scale1d(wf_econ)
 ```
 
- 
+## Economy RILE Features
+
 ```{r}
 # Features usage left/right
 feat_econ <- data.frame(
@@ -552,76 +448,57 @@ feat_econ <- data.frame(
   psi = wf_econ$psi,
   stringsAsFactors = FALSE)
 
-# Left
-econ_l <- feat_econ %>% 
-  top_n(200, psi) %>% 
-  top_n(-10, beta)
-  #DT::datatable()
-
-# Right
-econ_r <- feat_econ %>% 
-  top_n(200, psi) %>% 
-  top_n(10, beta) 
-  #DT::datatable()
-
-rbind(econ_l, econ_r) %>% 
-  arrange(beta) %>%    
-  mutate(word = factor(word, levels = word)) %>% 
-  ggplot(aes(x = word, y = beta)) +
-  geom_col() +
-  coord_flip() +
-  theme_classic()
+# # Left
+# feat_econ %>% 
+#   top_n(100000, psi) %>% 
+#   top_n(-1000, beta) %>% 
+#   arrange(desc(beta))
+# 
+# # Right
+# feat_econ %>% 
+#   top_n(20000, psi) %>% 
+#   top_n(1000, beta) %>% 
+#   arrange(desc(beta))
 ```
 
 
 ```{r}
-words_econ <- c('trabalho', 'petrobrás', 'auxílio', 'previdência', 'covid', 'desemprego',
-               'emprego', 'amazônia')
+words_econ <- c('trabalhadores', 'direitos', 'aposentados', 'pensionistas', 'escrvavidão',
+                'petrobrás', 'auxílio', 'previdência', 'covid', 'desempregado', 'sindical', 'amazônia',
+                'terceirização', 'agroindustriais', 'militarismo', 'grevista','emprego', 'veterinária',
+                'agropecuárias', 'pib', 'dívida', 'impostos', 'gastos', 'minerador', 'concessões', 
+                'logística', 'transportes', 'obra', 'anticapitalista', 'infraestrutura', 'pobres',
+                'reforma', 'agricultura', 'auxílio-doença', 'sindicalista', 'cut', 'reindustrialização',
+                'simplificar', 'empreendedorismo', 'inflação')
 
-scores_econ <- arrange(filter(feat_econ, word %in% words_econ),
-                      beta)
+scores_econ <- arrange(filter(feat_econ, word %in% words_econ), beta)
+
+# feat_econ %>% 
+#   filter(beta > 0.5 & beta < 1 & psi < -2.6 & psi > -6)
 
 ggplot(scores_econ, aes(beta, psi, label = word)) +
-  geom_point(color = 'grey', alpha = 0.2) +
+  geom_point(data = scores_econ, color = ifelse(scores_econ$beta > 0, "#00BFC4", "#F8766D")) +
   geom_text_repel(data = scores_econ, col = 'black') +
-  geom_point(data = scores_econ) +
   labs(x = 'Word Score', y = 'Word Frequency') +
-  ggtitle('Estimated Word Positions for Selected Debate Vocabulary') +
+  ggtitle('Estimated Word Positions for Economy Vocabulary') +
+  geom_vline(xintercept = c(0,0), linetype = "dotted") +
   theme_minimal()
 ```
 
-```{r}
+
+```{r eval=FALSE, include=FALSE}
 # 'Fighting words'
 zeta_wf <- wf_econ$beta*sqrt(exp(wf_econ$psi))
 names(zeta_wf) <- colnames(dfmat_econ)
-sort(zeta_wf,dec = T)[1:20]
+sort(zeta_wf,dec = T)[1:50]
 
 # plot(wf_econ$psi,zeta_wf, col=rgb(0,0,0,.5), pch=19, cex=.5)
 # text(wf_econ$psi,zeta_wf, names(zeta_wf), pos=4, cex=.6)
 ```
 
-
-```{r}
-# Find meaningful words by party
-parties_pres <- unique(pres_df$party)
-
-tidy(dfmat_econ) %>% 
-  bind_tf_idf(term, document, count) %>% 
-  filter(document %in% parties_pres) %>% 
-  arrange(desc(tf_idf)) %>% 
-  group_by(document) %>%
-  slice_max(tf_idf, n = 15) %>%
-  ungroup() %>%
-  ggplot(aes(tf_idf, fct_reorder(term, tf_idf), fill = document)) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ document, ncol = 3, scales = 'free') +
-  labs(x = 'tf-idf', y = NULL)
-```
-
-
 ## Analysis Security
 
-## Data Sec
+### Data Security
 
 ```{r Security_analysis}
 # List with documents about security
@@ -644,7 +521,6 @@ dfmat_sec <- speech_df %>%
 
 
 # Wordfish for sec
-
 dfmat_sec[19, 1]
 dfmat_sec[11, 1]
 
@@ -652,6 +528,7 @@ wf_sec <- textmodel_wordfish(dfmat_sec, dir = c(19, 11), sparse = TRUE)
 
 textplot_scale1d(wf_sec)
 ```
+
 ```{r}
 # Features usage left/right
 feat_sec <- data.frame(
@@ -660,29 +537,15 @@ feat_sec <- data.frame(
   psi = wf_sec$psi,
   stringsAsFactors = FALSE)
 
-# Left
-sec_l <- feat_sec %>% 
-  top_n(200, psi) %>% 
-  top_n(-10, beta)
-  #DT::datatable()
-
-# Right
-sec_r <- feat_sec %>% 
-  top_n(200, psi) %>% 
-  top_n(10, beta) 
-  #DT::datatable()
-
-rbind(sec_l, sec_r) %>% 
-  arrange(beta) %>%    
-  mutate(word = factor(word, levels = word)) %>% 
-  ggplot(aes(x = word, y = beta)) +
-  geom_col() +
-  coord_flip() +
-  theme_classic()
-```
-
-```{r}
-#textplot_keyness(textstat_keyness(dfmat_sec, target = dfmat_sec$Partido == 'PT'))
+# # Left
+# feat_sec %>% 
+#   top_n(200, psi) %>% 
+#   top_n(-10, beta)
+# 
+# # Right
+# feat_sec %>% 
+#   top_n(200, psi) %>% 
+#   top_n(10, beta) 
 ```
 
 ```{r}
@@ -703,7 +566,7 @@ ggplot(scores_sec, aes(beta, psi, label = word)) +
 
 ## Analysis Gender & Family
 
-## Data Genfam
+### Data Genfam
 ```{r}
 # List with documents about gender and family 
 genfam_id <- theme_df %>% 
@@ -742,28 +605,15 @@ feat_genfam <- data.frame(
   psi = wf_genfam$psi,
   stringsAsFactors = FALSE)
 
-# Left
-genfam_l <- feat_genfam %>% 
-  top_n(200, psi) %>% 
-  top_n(-20, beta)
-  #DT::datatable()
-
-# Right
-genfam_r <- feat_genfam %>% 
-  top_n(200, psi) %>% 
-  top_n(20, beta) 
-
-rbind(genfam_l, genfam_r) %>% 
-  arrange(beta) %>%    
-  mutate(word = factor(word, levels = word)) %>% 
-  ggplot(aes(x = word, y = beta)) +
-  geom_col() +
-  coord_flip() +
-  theme_classic()
-```
-
-```{r}
-#textplot_keyness(textstat_keyness(dfmat_genfam, target = dfmat_genfam$Partido == 'PT'))
+# # Left
+# feat_genfam %>% 
+#   top_n(200, psi) %>% 
+#   top_n(-20, beta)
+# 
+# # Right
+# feat_genfam %>% 
+#   top_n(200, psi) %>% 
+#   top_n(20, beta) 
 ```
 
 ```{r}
