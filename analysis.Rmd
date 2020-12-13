@@ -342,21 +342,78 @@ dfmat_pres <- dfm(corp_pres,
 All parties have more extreme values in the presidential manifestos. PT and PDT are more to the left on presidential manifestos, while the remaining parties are more to the right. 
 
 ```{r Topic_Model_Manifestos}
+library(topicmodels)
 
-# topic_pres <- stm(dfmat_pres, K = 4, seed = 12345)
-# labelTopics(topic_pres)
+lda_pres <- LDA(dfmat_pres, k = 6, control = list(seed = 123))
+
+topics_pres <- tidy(lda_pres, matrix = "beta")
+
+top_terms_pres <- topics_pres %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>% 
+  arrange(desc(beta))
+top_terms_pres
+
+
+#graph result -- also in graph.R
+top_terms_pres %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered()
+top_terms_pres
+
+#gamma --  XX% of the words in document X that were generated from topic X
+gamma_pres <- tidy(lda_pres, matrix = "gamma")
+
+#table higher gamma per project
+gamma_pres %>% 
+  group_by(document) %>% 
+  slice_max(gamma, n = 3, with_ties = FALSE) %>% 
+  filter(gamma > 0.4) %>% 
+  arrange(topic)
+
 
 ```
 
 
 ```{r Topic_Model_Senate}
-## erro no topic senado: Error in hpbcpp(optim.out$par, doc_ct = doc.ct, mu = mu, siginv = siginv, : chol(): decomposition failed
+lda_sen <- LDA(dfmat_sen, k = 6, control = list(seed = 123))
 
-#topic_sen_stm <- asSTMCorpus(dfmat_sen)
-#topic_sen <- stm(documents = topic_sen_stm$documents, vocab = topic_sen_stm$vocab, 4,
-                 #data = topic_sen_stm$data, seed = 123)
+topics_sen <- tidy(lda_sen, matrix = "beta")
 
-#labelTopics(topic_sen)
+top_terms_sen <- topics_sen %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>% 
+  arrange(desc(beta))
+top_terms_sen
+
+
+#graph result -- also in graph.R
+top_terms_sen %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  scale_x_reordered()
+top_terms_sen
+
+#gamma --  XX% of the words in document X that were generated from topic X
+gamma_sen <- tidy(lda_sen, matrix = "gamma")
+
+#table higher gamma per project
+gamma_sen %>% 
+  group_by(document) %>% 
+  slice_max(gamma, n = 3, with_ties = FALSE) %>% 
+  filter(gamma > 0.4) %>% 
+  arrange(topic)
 
 ```
 
