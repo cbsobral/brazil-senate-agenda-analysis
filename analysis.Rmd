@@ -118,7 +118,7 @@ merge(expected, observed, by = 'Gender') %>%
   pivot_longer(!Gender, names_to = 'Proportion', values_to = 'Value') %>% 
   mutate(across(is.numeric, ~ round(., 2))) %>% 
   ggplot(aes(Value, Proportion, group = Gender, fill = Gender, label = Value)) +
-  geom_col(position = "dodge") + 
+  geom_col(position = 'dodge') + 
   geom_label(position = position_dodge(0.9), show.legend = FALSE) +
   coord_flip() +
   theme_minimal()
@@ -135,7 +135,7 @@ party_sen <- sen_df %>%
   group_by(party_abbr) %>% 
   summarise(n = n()) %>%
   ggplot(aes(party_abbr, n)) +
-  geom_col(fill = "#00BFC4") +
+  geom_col(fill = '#00BFC4') +
   ylab('Number of Senators') +
   xlab('Parties in Senate') +
   theme_classic() +
@@ -146,7 +146,7 @@ party_speech <- speech_df %>%
   group_by(Partido) %>% 
   summarise(n = n()) %>%
   ggplot(aes(Partido, n)) +
-  geom_col(fill = "#F8766D") +
+  geom_col(fill = '#F8766D') +
   ylab('Speeches (2019 & 2020)') +
   xlab('Parties in Senate') +
   theme_classic() +
@@ -184,7 +184,7 @@ state_sen <- sen_df %>%
   group_by(state) %>% 
   summarise(n = n()) %>%
   ggplot(aes(state, n)) +
-  geom_col(fill = "#00BFC4") +
+  geom_col(fill = '#00BFC4') +
   ylab('Senators per State') +
   xlab('States of Brazil') +
   theme_classic()  
@@ -194,7 +194,7 @@ state_speech <- speech_df %>%
   group_by(UfParlamentarNaData) %>% 
   summarise(n = n()) %>%
   ggplot(aes(UfParlamentarNaData, n)) +
-  geom_col(fill = "#F8766D") +
+  geom_col(fill = '#F8766D') +
   geom_hline(yintercept = 192, linetype = 'dotted', col = 'blue') +
   ylab('Speeches (2019 & 2020)') +
   xlab('States of Brazil') +
@@ -243,7 +243,7 @@ merge(theta_sen_wf, cemf_2019, by = 'party') %>%
   ylab('Media Position') +
   xlab('Wordfish Position') +
   theme_minimal() +
-  theme(legend.position = "none") 
+  theme(legend.position = 'none') 
 ```
 
 ### 2018's Presidential Manifestos
@@ -320,7 +320,7 @@ theta_ps %>%
   ylab('Position from Presidential Corpus') +
   xlab('Position from Senate Corpus') +
   theme_minimal() +
-  theme(legend.position = "none") 
+  theme(legend.position = 'none') 
 ```
 
 Party positions derived from presidential manifestos (using `austin` prediction for out of sample documents) are more centered. Wordfish positions are more polarized. 
@@ -339,48 +339,7 @@ merge(theta_sen_wf, theta_sen_au, by = 'party') %>%
   ylab('Position from Presidential Corpus') +
   xlab('Position from Senate Corpus') +
   theme_minimal() +
-  theme(legend.position = "none") 
-```
-
-
-### Topic Model Presidential Manifestos
-
-```{r Topic_Model_Manifestos}
-lda_pres <- LDA(dfmat_pres, k = 6, control = list(seed = 123))
-
-topics_pres <- tidy(lda_pres, matrix = "beta")
-
-# Top words per topic
-topics_pres %>%
-  group_by(topic) %>%
-  top_n(15, beta) %>%
-  ungroup() %>%
-  arrange(topic, -beta) %>% 
-  arrange(desc(beta)) %>% 
-  mutate(term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(term, beta, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  coord_flip() +
-  scale_x_reordered()
-```
-
-
-```{r}
-# gamma --  probability of the words in document X that were generated from topic X
-gamma_pres <- tidy(lda_pres, matrix = "gamma")
-
-# table higher gamma per project
-gamma_pres %>% 
-  group_by(document) %>% 
-  slice_max(gamma, n = 3, with_ties = TRUE) %>% 
-  filter(gamma > 0.8) %>% 
-  arrange(topic) %>% 
-  rename(Party = 'document', Topic = 'topic', Gamma = 'gamma')
-```
-
-
-```{r Topic_Model_Senate}
+  theme(legend.position = 'none') 
 ```
 
 # Themes
@@ -391,7 +350,7 @@ Economy, Security and Gender & Family.
 
 ```{r}
 # Create Dictionary with themes of interest
-theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*', 'auxílio', 'desigualdade', 'petróleo', 'petro', 'desigual*', 'custo*', 'capital', 'ações', 'participação', 'aposent*', 'nacionalizar', 'mercado'), genfam = c('famíl*', 'famil*', 'just*', 'mulher*', 'solteir*', 'sex*', 'pai*', 'mãe', 'filh*', 'abort*', 'criança*', 'abrigo', 'gênero', 'gay', 'kit gay', 'jove*', 'juventude', 'tradicional'), security = c('sequestr*', 'inocent*', 'puni*','condena*','sentença', 'tribunal', 'juiz', 'justiça', 'crim*', 'bandid*', 'criminos*', 'ilícit*', 'infrator*', 'impunidade', 'promotor*', 'instância', 'transitado', 'julgado', 'julgamento', 'bala', 'balead*', 'tiro', 'fuzil', 'arma', 'armamento', 'pistola', 'rifle', 'polícia', 'policial', 'militar', 'cidadão de bem', 'cadeia*', 'prisão', 'prisioneir*', 'investigação', 'intervenção militar', 'UPP', 'segurança pública', '*anticrime', '*anti-crime', 'assassin*', 'ladrão', 'vagabund*', 'saidão', 'condicional', 'progressão de regime', 'réu', 'defensoria', 'estupr*', 'traficante*', 'detenção', 'detent*',  'violência', 'reincidente', 'reincidência', 'delinquente', 'menor', 'maioridade penal', 'drogas', 'entorpecent*')))
+theme.lexicon <- dictionary(list(economy = c('econom*', 'desempreg*', 'inflação', 'demanda', 'oferta', 'negócios', 'empreg*', 'preço*', 'banco', 'dinheiro', 'gastos', 'dívida', 'juro*', 'control*', 'custo*', 'produtividade', 'índice', 'renda', 'pib', 'produto', 'bruto', 'empreg*', 'trabalh*', 'privat*', 'auxílio', 'desigualdade', 'petróleo', 'petro', 'desigual*', 'custo*', 'capital', 'ações', 'participação', 'aposent*', 'nacionalizar', 'mercado'), genfam = c('famíl*', 'famil*', 'just*', 'mulher*', 'solteir*', 'sex*', 'pai*', 'mãe', 'filh*', 'abort*', 'criança*', 'abrigo', 'gênero', 'gay', 'kit gay', 'jove*', 'juventude', 'tradicional'), security = c('sequestr*', 'inocent*', 'puni*','condena*','sentença', 'tribunal', 'juiz', 'justiça', 'crim*', 'bandid*', 'criminos*', 'ilícit*', 'infrator*', 'impunidade', 'promotor*', 'instância', 'transitado', 'julgado', 'julgamento', 'bala', 'balead*', 'tiro', 'fuzil', 'arma', 'armamento', 'pistola', 'rifle', 'polícia', 'policial', 'militar', 'cidadão de bem', 'cadeia*', 'prisão', 'prisioneir*', 'investigação', 'intervenção militar', 'UPP', 'segurança pública', '*anticrime', '*anti-crime', 'assassin*', 'ladrão', 'vagabund*', 'saidão', 'condicional', 'progressão de regime', 'réu', 'defensoria', 'estupr*', 'traficante*', 'detenção', 'detent*',  'violência', 'reinci*', 'delinquente', 'menor', 'maioridade penal', 'drogas', 'entorpecent*')))
 
 # Create DFM with theme.lexicon, apply weights and convert to data frame
 theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>% 
@@ -477,11 +436,11 @@ scores_econ <- arrange(filter(feat_econ, word %in% words_econ), beta)
 #   filter(beta > 0.5 & beta < 1 & psi < -2.6 & psi > -6)
 
 ggplot(scores_econ, aes(beta, psi, label = word)) +
-  geom_point(data = scores_econ, color = ifelse(scores_econ$beta > 0, "#00BFC4", "#F8766D")) +
+  geom_point(data = scores_econ, color = ifelse(scores_econ$beta > 0, '#00BFC4', '#F8766D')) +
   geom_text_repel(data = scores_econ, col = 'black') +
   labs(x = 'Word Score', y = 'Word Frequency') +
   ggtitle('Estimated Word Positions for Economy Vocabulary') +
-  geom_vline(xintercept = c(0,0), linetype = "dotted") +
+  geom_vline(xintercept = c(0,0), linetype = 'dotted') +
   theme_minimal()
 ```
 
@@ -617,10 +576,10 @@ feat_genfam <- data.frame(
 ```
 
 ```{r}
-words_genfam <- c('kit gay', 'just*', 'tradicional', 'mulher', 'gênero', 'feminis*', 'juventude', 'gay', 'jovem', 'família')
+words_genfam <- c('kit gay', 'just*', 'tradicional', 'mulher', 'gênero', 'feminis*', 'juventude', 'gay',
+                  'jovem', 'família')
 
-scores_genfam <- arrange(filter(feat_genfam, word %in% words_genfam),
-                      beta)
+scores_genfam <- arrange(filter(feat_genfam, word %in% words_genfam), beta)
 
 ggplot(scores_genfam, aes(beta, psi, label = word)) +
   geom_point(color = 'grey', alpha = 0.2) +
