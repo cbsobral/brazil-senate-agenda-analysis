@@ -359,9 +359,11 @@ theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>%
 ```
 
 
-## Analysis Econonomy
+## Econonomy
 
-### Data Econonmy
+### Data
+
+To extract documents that discuss economic topics, we filter documents that have higher scores on the economy dictionary when compared to the security and gender & family dictionaries. 
 
 ```{r}
 # List with documents about economy
@@ -385,19 +387,32 @@ dfmat_econ <- speech_df %>%
 dfmat_econ <- dfm_select(dfmat_econ, min_nchar = 2)
 ```
 
-### Economy Scaling
+### Scaling
+
+Comparing the economy graph for Wordfish with the main graph, we do not see much difference in party positions.
 
 ```{r}
 # Wordfish for econ
-dfmat_econ[19, 1]
-dfmat_econ[11, 1]
+# dfmat_econ[19, 1]
+# dfmat_econ[11, 1]
 
+# Wordfish for economy DFM
 wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(19, 11), sparse = TRUE) # PT and PR
 
-textplot_scale1d(wf_econ)
+
+# Plot economy and main DFM graphs
+gridExtra::grid.arrange(textplot_scale1d(wf_econ), textplot_scale1d(wf), ncol = 2, 
+                        bottom = "Economy DFM --- Main DFM")
 ```
 
-## Economy RILE Features
+## RILE Features
+
+The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -2.5 to 2. 
+
+The words that most contributed for a left-leaning document are *petrobrás, anticapitalista, cut,  auxílio-doença, sindicalista* and *terceirização*. For the right, the words are *militarismo, agroindustriais, grevista, veterinária, logística* and *transportes*. 
+
+In general, the right discusses = agricultura, with words like (...), empreendedorismo/liberalismo, logística/infraestrutura.
+The left = previdência, with words like (...), trabalhadores, direitos, macroeconomia, sindicalismo.
 
 ```{r}
 # Features usage left/right
@@ -407,22 +422,9 @@ feat_econ <- data.frame(
   psi = wf_econ$psi,
   stringsAsFactors = FALSE)
 
-# # Left
-# feat_econ %>% 
-#   top_n(100000, psi) %>% 
-#   top_n(-1000, beta) %>% 
-#   arrange(desc(beta))
-# 
-# # Right
-# feat_econ %>% 
-#   top_n(20000, psi) %>% 
-#   top_n(1000, beta) %>% 
-#   arrange(desc(beta))
-```
 
-
-```{r}
-words_econ <- c('trabalhadores', 'direitos', 'aposentados', 'pensionistas', 'escrvavidão',
+# Select words for graph
+words_econ <- c('trabalhadores', 'direitos', 'aposentados', 'pensionistas', 'escrvavidão', 'liberal',
                 'petrobrás', 'auxílio', 'previdência', 'covid', 'desempregado', 'sindical', 'amazônia',
                 'terceirização', 'agroindustriais', 'militarismo', 'grevista','emprego', 'veterinária',
                 'agropecuárias', 'pib', 'dívida', 'impostos', 'gastos', 'minerador', 'concessões', 
@@ -430,11 +432,10 @@ words_econ <- c('trabalhadores', 'direitos', 'aposentados', 'pensionistas', 'esc
                 'reforma', 'agricultura', 'auxílio-doença', 'sindicalista', 'cut', 'reindustrialização',
                 'simplificar', 'empreendedorismo', 'inflação')
 
+# Extract scores
 scores_econ <- arrange(filter(feat_econ, word %in% words_econ), beta)
 
-# feat_econ %>% 
-#   filter(beta > 0.5 & beta < 1 & psi < -2.6 & psi > -6)
-
+# Plot words on the RILE scale
 ggplot(scores_econ, aes(beta, psi, label = word)) +
   geom_point(data = scores_econ, color = ifelse(scores_econ$beta > 0, '#00BFC4', '#F8766D')) +
   geom_text_repel(data = scores_econ, col = 'black') +
@@ -444,16 +445,6 @@ ggplot(scores_econ, aes(beta, psi, label = word)) +
   theme_minimal()
 ```
 
-
-```{r eval=FALSE, include=FALSE}
-# 'Fighting words'
-zeta_wf <- wf_econ$beta*sqrt(exp(wf_econ$psi))
-names(zeta_wf) <- colnames(dfmat_econ)
-sort(zeta_wf,dec = T)[1:50]
-
-# plot(wf_econ$psi,zeta_wf, col=rgb(0,0,0,.5), pch=19, cex=.5)
-# text(wf_econ$psi,zeta_wf, names(zeta_wf), pos=4, cex=.6)
-```
 
 ## Analysis Security
 
@@ -513,6 +504,12 @@ words_sec <- c('bandido', 'cadeia', 'prisão', 'vagabundo', 'arma', 'tiro',
 
 scores_sec <- arrange(filter(feat_sec, word %in% words_sec),
                       beta)
+
+##### mostrar palavras mais à direita e à esquerda
+scores_sec %>% 
+  arrange(desc(beta)) %>%  # tirar o desc para mostrar palavras da esquerda = arrange(beta)
+  select(word)
+######
 
 ggplot(scores_sec, aes(beta, psi, label = word)) +
   geom_point(color = 'grey', alpha = 0.2) +
@@ -580,6 +577,12 @@ words_genfam <- c('kit gay', 'just*', 'tradicional', 'mulher', 'gênero', 'femin
                   'jovem', 'família')
 
 scores_genfam <- arrange(filter(feat_genfam, word %in% words_genfam), beta)
+
+##### mostrar palavras mais à direita e à esquerda
+scores_genfam %>% 
+  arrange(desc(beta)) %>%  # tirar o desc para mostrar palavras da esquerda == arrange(beta)
+  select(word)
+######
 
 ggplot(scores_genfam, aes(beta, psi, label = word)) +
   geom_point(color = 'grey', alpha = 0.2) +
