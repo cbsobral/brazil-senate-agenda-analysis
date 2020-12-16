@@ -154,7 +154,7 @@ party_speech <- speech_df %>%
 
 gridExtra::grid.arrange(party_sen, party_speech)
 ```
-```{r message=FALSE, warning=FALSE}
+```{r Prop_Speeches_Party, message=FALSE, warning=FALSE}
 n_speeches <- speech_df %>% 
   group_by(Partido) %>% 
   summarise(Speeches = n()) %>%
@@ -359,7 +359,7 @@ theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>%
 ```
 
 
-## Econonomy
+## Economy
 
 ### Data
 
@@ -446,9 +446,11 @@ ggplot(scores_econ, aes(beta, psi, label = word)) +
 ```
 
 
-## Analysis Security
+## Security
 
-### Data Security
+### Data 
+To extract documents that discuss security topics, we filter documents that have higher scores on the security dictionary when compared to the economy and gender & family dictionaries.
+
 
 ```{r Security_analysis}
 # List with documents about security
