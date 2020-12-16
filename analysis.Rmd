@@ -60,6 +60,7 @@ load('data/sen_df.Rda')
 # Load speeches data frame
 load('data/speech_df.Rda')
 
+
 # Main Corpus 
 corp_sen <- corpus(speech_df, docid_field = 'CodigoPronunciamento', 
                    text_field = 'Pronunciamento')
