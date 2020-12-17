@@ -97,7 +97,10 @@ Looking into distribution of gender per party, 9 of these parties have at least 
 
 Considering these characteristics of the Senate House, let's see if the speech distribution follows the same pattern, i.e., let's check if Females' are responsible for 1/8 of the total speeches, and how speeches are distributed among these 16 Parties, and among the 27 States.
 
+
 ### Gender
+
+We see that women represent 12.5% of the Senate, but are responsible only for 8.79% of the speeches. This result seems consistent with indicators for gender inequality in Brazil, and their effects on women in the workplace.
 
 ```{r Gender_Senate, message=FALSE, warning=FALSE}
 # Expected frequency of speeches per gender -- based on the number of  senators
@@ -125,10 +128,10 @@ merge(expected, observed, by = 'Gender') %>%
   theme_minimal()
 ```
 
-We see that women represent 12.5% of the Senate, but are responsible only for 8.79% of the speeches. This result seems consistent with indicators for gender inequality in Brazil, and their effects on women in the workplace.
-
 
 ### Parties
+
+In what concerns the distribution of speeches per party, we expected MDB, PODEMOS and PSD to have a higher number of speeches, as they account for a larger percentage of the Senate House. What we find out, in fact, is that PT, with only 6 Senators (8% of the Senate House) has 1097 speeches (21% of the speeches). PT was the runner-off party of the 2018 elections and was the party elected for the presidential elections of 2002, 2006, 2010 and 2014. This finding might indicate a higher opposition to Bolsonaro's agenda within the Senate corpus.
 
 ```{r Parties_Senate, message=FALSE, warning=FALSE}
 # Plot senators by party
@@ -173,11 +176,14 @@ merge(n_speeches, n_senators, by = 'Partido') %>%
   arrange(desc(Prop_Speeches))
 ```
 
-In what concerns the distribution of speeches per party, we expected MDB, PODEMOS and PSD to have a higher number of speeches, as they account for a larger percentage of the Senate House. What we find out, in fact, is that PT, with only 6 Senators (8% of the Senate House) has 1097 speeches (21% of the speeches). PT was the runner-off party of the 2018 elections and was the party elected for the presidential elections of 2002, 2006, 2010 and 2014. This finding might indicate a higher opposition to Bolsonaro's agenda within the Senate corpus.
 
 ### States
 
 Our data set is composed of 5188 speeches given by 80 Senators of 27 States. Assuming each Senator uses speech opportunities equally, we would expect each State to have around 192 speeches. Let's see if this checks out.
+
+What we see, in fact, is that Senators coming from some States, such as RS, PE, DF and AP far exceed the expected average of speeches; at the same time, Senators from PB, AC and RJ seem not to have spoken as much as their peers in the period of 2019 and 2020. 
+
+This might indicate that the items relevant for the agenda of the States that have more speeches might bear higher weight in the corpus.
 
 
 ```{r UF_Senate, message=FALSE, warning=FALSE}
@@ -203,10 +209,6 @@ state_speech <- speech_df %>%
 
 gridExtra::grid.arrange(state_sen, state_speech)
 ```
-
-What we see, in fact, is that Senators coming from some States, such as RS, PE, DF and AP far exceed the expected average of speeches; at the same time, Senators from PB, AC and RJ seem not to have spoken as much as their peers in the period of 2019 and 2020. 
-
-This might indicate that the items relevant for the agenda of the States that have more speeches might bear higher weight in the corpus.
 
 
 ## Speeches Scaling {.tabset}
@@ -270,6 +272,9 @@ dfmat_pres <- dfm(corp_pres,
 dfmat_pres <- dfm_select(dfmat_pres, min_nchar = 2)
 ```
 
+
+#### Parties in 2018's Presidential Election 
+
 All parties have more extreme values in the presidential manifestos. PT and PDT are more to the left on presidential manifestos, while the remaining parties are more to the right. 
 
 
@@ -321,6 +326,9 @@ theta_ps %>%
   theme(legend.position = 'none') 
 ```
 
+
+#### All Senate Parties
+
 Party positions derived from presidential manifestos (using `austin` prediction for out of sample documents) are more centered. Wordfish positions are more polarized. 
 
 ```{r}
@@ -339,6 +347,7 @@ merge(theta_sen_wf, theta_sen_au, by = 'party') %>%
   theme_minimal() +
   theme(legend.position = 'none') 
 ```
+
 
 # Themes
 
@@ -410,6 +419,7 @@ The graph displays words that push a document farthest to the left or to the rig
 The words that most contributed for a left-leaning document are *petrobrás, anticapitalista, cut,  auxílio-doença, sindicalista* and *terceirização*. For the right, the words are *militarismo, agroindustriais, grevista, veterinária, logística* and *transportes*. 
 
 In general, the right discusses = agricultura, with words like (...), empreendedorismo/liberalismo, logística/infraestrutura.
+
 The left = previdência, with words like (...), trabalhadores, direitos, macroeconomia, sindicalismo.
 
 ```{r}
@@ -447,6 +457,7 @@ ggplot(scores_econ, aes(beta, psi, label = word)) +
 ## Security {.tabset}
 
 ### Data 
+
 To extract documents that discuss security topics, we filter documents that have higher scores on the security dictionary when compared to the economy and gender & family dictionaries.
 
 
