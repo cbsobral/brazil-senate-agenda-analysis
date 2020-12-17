@@ -212,7 +212,7 @@ gridExtra::grid.arrange(state_sen, state_speech)
 
 
 ## Speeches Scaling {.tabset}
-
+First, we use Wordfish as the text scaling method for the Senate speeches. After, as shown below, we plot the results of a fitted scaling model. 
 ```{r RILE_speaches}
 # Wordfish
 wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
@@ -224,9 +224,15 @@ theta_sen_wf <- as.data.frame(wf$theta, wf$docs) %>%
     rename(theta_sen_wf = 'wf$theta')
 ```
 
+To better understand the Senate speeches position generated with Wordfish, we compare it with the Media perception of each party and with Presidential Manifestos from 2018. 
+
 ### Wordfish Scores X Media
 
-Plot wordfish scores x perceived party position by media -- `cemf_2019`.
+The graph below shows the Brazilian Media categorization (Y-axis) and the Wordfish categorization (X-axis) for each party. 
+
+Some parties appear as similar positions in both situations, such as PSB, PSDB, and MDB. On the other hand, the Wordfish model considers PT on the extreme left, around -2 on the scale. In contrast, the Media considers the same party on the left, around -1 on the scale.
+
+We see the same pattern on the other side of the scale. While the Media considers PSL on the right, the Wordfish model assumes the same party in the center position. 
 
 ```{r RILE_media, message=FALSE, warning=FALSE}
 load('data/cemf_2019.Rda') # party position per media outlet
@@ -250,6 +256,10 @@ merge(theta_sen_wf, cemf_2019, by = 'party') %>%
 ```
 
 ### 2018's Presidential Manifestos
+
+The graph illustrates the party positions from the Presidential corpus (Y-axis) and the Senate corpus (X-axis). 
+
+It is possible to see a pattern where parties are mostly allocated to the right when using Senate speeches. Although, when analyzing Presidential manifestos, parties are mostly allocated to the left. There is one exception of PDT, which is around the center spectrum on Presidential corpus, and on the extreme left for the Senate corpus. 
 
 ```{r Presidential_Campaign}
 # Load data frame with presidential election manifestos
@@ -539,6 +549,8 @@ ggplot(scores_sec, aes(beta, psi, label = word)) +
 ## Gender & Family {.tabset}
 
 ### Data 
+
+To extract documents that discuss Gender and Family topics, we filter documents that have higher scores on the genfam dictionary when compared to the economy and security dictionaries. 
 
 ```{r}
 # List with documents about gender and family 
