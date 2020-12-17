@@ -81,9 +81,9 @@ docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
 ```
 
 
-# Senate
+# Senate 
 
-## General Characteristics Senate
+## General Characteristics {.tabset}
 
 Considering the 26 States plus the Federal District each are entitled to three senates, we would expect the sen_df to have 81 senators, however, Roraima (RR) had one of its senators (Chico Rodrigues) suspended from his activities following an investigation on diversion of resources. For the purposes of this analysis, we will consider the Federal District a State.
 
@@ -209,7 +209,7 @@ What we see, in fact, is that Senators coming from some States, such as RS, PE, 
 This might indicate that the items relevant for the agenda of the States that have more speeches might bear higher weight in the corpus.
 
 
-## Right/Left Positions from Speeches   
+## Speeches Scaling {.tabset}
 
 ```{r RILE_speaches}
 # Wordfish
@@ -222,7 +222,7 @@ theta_sen_wf <- as.data.frame(wf$theta, wf$docs) %>%
     rename(theta_sen_wf = 'wf$theta')
 ```
 
-### Senado X Media
+### Wordfish Scores X Media
 
 Plot wordfish scores x perceived party position by media -- `cemf_2019`.
 
@@ -252,10 +252,7 @@ merge(theta_sen_wf, cemf_2019, by = 'party') %>%
 ```{r Presidential_Campaign}
 # Load data frame with presidential election manifestos
 load('data/pres_df.Rda')
-```
 
-
-```{r RILE_SenatevPresidential}
 # Corpus Presidential Speeches
 corp_pres <- corpus(pres_df, docid_field = 'party', 
                    text_field = 'text')
@@ -360,7 +357,7 @@ theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>%
 ```
 
 
-## Economy
+## Economy {.tabset}
 
 ### Data
 
@@ -406,7 +403,7 @@ gridExtra::grid.arrange(textplot_scale1d(wf_econ), textplot_scale1d(wf), ncol = 
                         bottom = "Economy DFM --- Main DFM")
 ```
 
-## RILE Features
+### RILE Features
 
 The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -2.5 to 2. 
 
@@ -447,7 +444,7 @@ ggplot(scores_econ, aes(beta, psi, label = word)) +
 ```
 
 
-## Security
+## Security {.tabset}
 
 ### Data 
 To extract documents that discuss security topics, we filter documents that have higher scores on the security dictionary when compared to the economy and gender & family dictionaries.
@@ -471,8 +468,11 @@ dfmat_sec <- speech_df %>%
       remove_symbols = TRUE,
       stem = FALSE,  
       groups = 'Partido')
+```
 
+### Scaling
 
+```{r}
 # Wordfish for sec
 dfmat_sec[19, 1]
 dfmat_sec[11, 1]
@@ -481,6 +481,8 @@ wf_sec <- textmodel_wordfish(dfmat_sec, dir = c(19, 11), sparse = TRUE)
 
 textplot_scale1d(wf_sec)
 ```
+
+### RILE Features
 
 ```{r}
 # Features usage left/right
@@ -512,7 +514,7 @@ scores_sec <- arrange(filter(feat_sec, word %in% words_sec),
 scores_sec %>% 
   arrange(desc(beta)) %>%  # tirar o desc para mostrar palavras da esquerda = arrange(beta)
   select(word)
-######
+
 
 ggplot(scores_sec, aes(beta, psi, label = word)) +
   geom_point(color = 'grey', alpha = 0.2) +
@@ -523,9 +525,10 @@ ggplot(scores_sec, aes(beta, psi, label = word)) +
   theme_minimal()
 ```
 
-## Analysis Gender & Family
+## Gender & Family {.tabset}
 
-### Data Genfam
+### Data 
+
 ```{r}
 # List with documents about gender and family 
 genfam_id <- theme_df %>% 
@@ -546,15 +549,21 @@ dfmat_genfam <- speech_df %>%
       groups = 'Partido')
 
 dfmat_genfam <- dfm_trim(dfmat_genfam, min_termfreq = 2, min_docfreq = 2)
+```
 
+### Scaling
+
+```{r}
 # Wordfish for econ
 dfmat_genfam[19, 1]
 dfmat_genfam[11, 1]
 
-wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(19, 11), sparse = TRUE)
+wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(19, 11), sparse = TRUE) # PT and PR
 
 textplot_scale1d(wf_genfam)
 ```
+
+### RILE Features
 
 ```{r}
 # Features usage left/right
@@ -585,7 +594,7 @@ scores_genfam <- arrange(filter(feat_genfam, word %in% words_genfam), beta)
 scores_genfam %>% 
   arrange(desc(beta)) %>%  # tirar o desc para mostrar palavras da esquerda == arrange(beta)
   select(word)
-######
+
 
 ggplot(scores_genfam, aes(beta, psi, label = word)) +
   geom_point(color = 'grey', alpha = 0.2) +
