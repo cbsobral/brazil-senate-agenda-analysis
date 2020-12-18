@@ -410,8 +410,8 @@ Comparing the economy graph for Wordfish with the main graph, we do not see much
 
 ```{r}
 # Wordfish for econ
-# dfmat_econ[19, 1]
-# dfmat_econ[11, 1]
+#dfmat_econ[19, 1]
+#dfmat_econ[11, 1]
 
 # Wordfish for economy DFM
 wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(19, 11), sparse = TRUE) # PT and PR
@@ -489,21 +489,35 @@ dfmat_sec <- speech_df %>%
       remove_symbols = TRUE,
       stem = FALSE,  
       groups = 'Partido')
+dfmat_sec <- dfm_select (dfmat_sec, min_nchar = 2)
+
 ```
 
 ### Scaling
+Comparing the security graph for Wordfish with the main graph, we see a lot of change in party positions.
 
 ```{r}
 # Wordfish for sec
-dfmat_sec[19, 1]
-dfmat_sec[11, 1]
+#dfmat_sec[18, 1] #PT
+#dfmat_sec[10, 1]# PR
 
-wf_sec <- textmodel_wordfish(dfmat_sec, dir = c(19, 11), sparse = TRUE)
+#wordfish for security DFM
+wf_sec <- textmodel_wordfish(dfmat_sec, dir = c(18, 10), sparse = TRUE)
 
-textplot_scale1d(wf_sec)
+gridExtra::grid.arrange(textplot_scale1d(wf_sec), textplot_scale1d(wf), ncol = 2, 
+                        bottom = "Security DFM --- Main DFM")
 ```
 
 ### RILE Features
+The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -1.5 to 1.5.
+
+The words that most contributed for a left-leaning document are defensoria ("public attorney office"), defensores ("public attorneys"), direitos ("rights"), humanos ("human"), perseguição ("harassment"), liberdade ("freedom") . For the right, the words are vagabundo(s) ("tramps"), juvenis ("juvenile"), tropa ("troop"), pcc (the largest gang in SP), farda ("police suit").
+
+In general, the right discusses crime, criminals and law enforcement activities, while the left discusses human rights and judicial harassment.
+
+Interestingly, the use of cadeia ("jail") and prisão ("prison"), which are synonyms in Portuguese, seem associated with speeches in different sides of the RILE spectrum. Similarly, the word vagabundagem (iddleness that characterizes a tramp) and vagabundo (s) ("tramp") are also associated with different sides of RILE.
+
+Finally, "feminicídio" (a releatively new tipification for an aggravated homicide committed against a woman by her former romantic partner), which is a crime typically criticized by right wing politicians with a conservative view of gender issues, is the word that appears most strongly associated with a right-leaning political view.
 
 ```{r}
 # Features usage left/right
@@ -512,6 +526,7 @@ feat_sec <- data.frame(
   beta = wf_sec$beta,
   psi = wf_sec$psi,
   stringsAsFactors = FALSE)
+
 
 # # Left
 # feat_sec %>% 
@@ -525,24 +540,21 @@ feat_sec <- data.frame(
 ```
 
 ```{r}
-words_sec <- c('bandido', 'cadeia', 'prisão', 'vagabundo', 'arma', 'tiro',
-               'policial')
+# Select words for graph
+words_sec <- c('bandidagem','direitos', 'humanos','juiz','perseguição', 'liberdade', 'defesa','violência','cadeia', 'prisão', 'vagabundo', 'vagabundos', 'vagabundagem', 'defensoria','defensores', 'militares', 'policial', 'tropa', 'farda','polícia', 'pcc', 'juvenis','arma', 'tiro', 'feminicídio', 'fiança','militar')
+              
+# Extract scores
 
 scores_sec <- arrange(filter(feat_sec, word %in% words_sec),
                       beta)
 
-##### mostrar palavras mais à direita e à esquerda
-scores_sec %>% 
-  arrange(desc(beta)) %>%  # tirar o desc para mostrar palavras da esquerda = arrange(beta)
-  select(word)
-
+# Plot words on the RILE scale
 
 ggplot(scores_sec, aes(beta, psi, label = word)) +
-  geom_point(color = 'grey', alpha = 0.2) +
+  geom_point(color = ifelse(scores_sec$beta > 0, '#00BFC4', '#F8766D')) +
   geom_text_repel(data = scores_sec, col = 'black') +
-  geom_point(data = scores_sec) +
   labs(x = 'Word Score', y = 'Word Frequency') +
-  ggtitle('Estimated Word Positions for Selected Debate Vocabulary') +
+  ggtitle('Estimated Word Positions for Security Vocabulary') + geom_vline(xintercept = c(0,0), linetype = 'dotted') +
   theme_minimal()
 ```
 
