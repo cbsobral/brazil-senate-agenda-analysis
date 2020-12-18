@@ -360,8 +360,13 @@ merge(theta_sen_wf, theta_sen_au, by = 'party') %>%
 
 
 # Themes
+Having assessed how the parties in senate are positioned in the RILE Scale, let's check how the discussions on the three topics of Bolsonaro's agenda appear in the Senate House. 
 
-Economy, Security and Gender & Family. 
+For this section, we employed a dictionary analysis, identifying a few words with each topic in order to classify the corpus accordingly.
+
+We initially consulted the  “LexiCoder Policy Agenda” dictionary to have a baseline for words that could capture these main topics. We then translated to Portuguese and adapted to Brazilian context. 
+
+In the following sections, we will analyze the three aforementioned dimensions under the topics Economy, Security and Gender & Family. 
 
 ## Dictionary 
 
@@ -380,7 +385,7 @@ theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>%
 
 ### Data
 
-To extract documents that discuss economic topics, we filter documents that have higher scores on the economy dictionary when compared to the security and gender & family dictionaries. 
+To extract documents that discuss economic topics, we filtered documents that have higher scores on the economy dictionary when compared to the security and gender & family dictionaries. 
 
 ```{r}
 # List with documents about economy
@@ -406,7 +411,7 @@ dfmat_econ <- dfm_select(dfmat_econ, min_nchar = 2)
 
 ### Scaling
 
-Comparing the economy graph for Wordfish with the main graph, we do not see much difference in party positions.
+Comparing the economy graph for Wordfish with the main graph, we do not see much difference in party positions. This might suggest that discussions on Economy are the main driver behind the allocation of parties in the RILE spectrum. In other words, views on economic matters could bear a high weight in the definition of where a party is positioned in the ideological spectrum. This suggests that economic discussions are more salient in the corpus. 
 
 ```{r}
 # Wordfish for econ
@@ -426,11 +431,11 @@ gridExtra::grid.arrange(textplot_scale1d(wf_econ), textplot_scale1d(wf), ncol = 
 
 The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -2.5 to 2. 
 
-The words that most contributed for a left-leaning document are *petrobrás, anticapitalista, cut,  auxílio-doença, sindicalista* and *terceirização*. For the right, the words are *militarismo, agroindustriais, grevista, veterinária, logística* and *transportes*. 
+The words that most contributed for a left-leaning document are *petrobrás (an oil extracting public company whose privatization is a contentious topic), anticapitalista ("anticapitalist"), cut ("centralized labour union"),  auxílio-doença ("illness aid",an employment benefit), sindicalista* ("unionist") and *terceirização* ("outsourcing"). For the right, the words are *militarismo ("militarism"), agroindustriais ("agribusiness"), grevista ("striker"), veterinária ("veterinarian"), logística* ("logistics") and *transportes* ("transport"). 
 
-In general, the right discusses = agricultura, with words like (...), empreendedorismo/liberalismo, logística/infraestrutura.
+In general, the right discusses angrucultura (agribusiness), with words like empreendedorismo ("entrepeneurship")/ liberalismo ("liberalism"), logística ("logistics") /infraestrutura ("infrastructure").
 
-The left = previdência, with words like (...), trabalhadores, direitos, macroeconomia, sindicalismo.
+The left discusses previdência ("pension benefits"), with words like trabalhadores ("workers"), direitos ("rights"), macroeconomia ("macroeconomics"), sindicalismo ("trade unionism").
 
 ```{r}
 # Features usage left/right
@@ -468,7 +473,7 @@ ggplot(scores_econ, aes(beta, psi, label = word)) +
 
 ### Data 
 
-To extract documents that discuss security topics, we filter documents that have higher scores on the security dictionary when compared to the economy and gender & family dictionaries.
+To extract documents that discuss security topics, we filtered documents that have higher scores on the security dictionary when compared to the economy and gender & family dictionaries.
 
 
 ```{r Security_analysis}
@@ -494,7 +499,7 @@ dfmat_sec <- dfm_select (dfmat_sec, min_nchar = 2)
 ```
 
 ### Scaling
-Comparing the security graph for Wordfish with the main graph, we see a lot of change in party positions.
+Comparing the security graph for Wordfish with the main graph, we see a lot of change in party positions. This may suggest that security bears a smaller weight into defining general parties positions, and/or there is a lot of overlap in the security vocabulary used by senators across the spectrum.
 
 ```{r}
 # Wordfish for sec
@@ -517,7 +522,7 @@ In general, the right discusses crime, criminals and law enforcement activities,
 
 Interestingly, the use of cadeia ("jail") and prisão ("prison"), which are synonyms in Portuguese, seem associated with speeches in different sides of the RILE spectrum. Similarly, the word vagabundagem (iddleness that characterizes a tramp) and vagabundo (s) ("tramp") are also associated with different sides of RILE.
 
-Finally, "feminicídio" (a releatively new tipification for an aggravated homicide committed against a woman by her former romantic partner), which is a crime typically criticized by right wing politicians with a conservative view of gender issues, is the word that appears most strongly associated with a right-leaning political view.
+Finally, "feminicídio" (a relatively new criminal offense for an aggravated homicide committed against a woman by her former romantic partner), which is a diferenciation to standard homicide typically criticized by right wing politicians with a conservative view of gender issues, is the word that appears most strongly associated with a right-leaning political view.
 
 ```{r}
 # Features usage left/right
