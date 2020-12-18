@@ -217,7 +217,7 @@ First, we use Wordfish as the text scaling method for the Senate speeches. After
 
 ```{r RILE_speaches}
 # Wordfish
-wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
+wf <- textmodel_wordfish(dfmat_sen, dir = c(16, 6), sparse = TRUE) # PT and PL
 textplot_scale1d(wf)
 
 # Data frame with Wordsfish party positions
@@ -249,8 +249,8 @@ merge(theta_sen_wf, cemf_2019, by = 'party') %>%
   geom_point() + 
   geom_label_repel(show.legend = FALSE) +
   geom_abline() +
-  xlim(-2.5, 2) +
-  ylim(-2.5, 2) +
+  xlim(-2.5, 3) +
+  ylim(-2.5, 3) +
   ylab('Media Position') +
   xlab('Wordfish Position') +
   theme_minimal() +
@@ -299,34 +299,29 @@ All parties have more extreme values in the presidential manifestos. PT and PDT 
 ```{r message=FALSE, warning=FALSE}
 # austin
 # as wfm
-# wfm_pres <- as.wfm(dfmat_pres, word.margin = 2)
-# 
-# # wordfish pres
-# wfa_pres <- wordfish(wfm_pres, dir = c(4, 3)) # PSOL, PSL
-# 
-# # match sen features with pres
-# dfmat_match <- dfm_match(dfmat_sen, featnames(dfmat_pres))
-# 
-# # convert to wfm
-# wfm_match <- as.wfm(dfmat_match, word.margin = 2)
-# 
-# # predict values to senate speeches
-# theta_sen_au <- as.data.frame(predict(wfa_pres, newdata = wfm_match)) %>%
-#   rownames_to_column('party') %>%
-#   rename(theta_sen_au = 'predict(wfa_pres, newdata = wfm_match)')
+wfm_pres <- as.wfm(dfmat_pres, word.margin = 2)
 
-load('data/theta/theta_sen_au.Rda')
+# wordfish pres
+wfa_pres <- wordfish(wfm_pres, dir = c(4, 3)) # PSOL, PSL
 
-# # pres scores
-# theta_pres_au <- as.data.frame(wfa_pres$theta, wfa_pres$docs) %>%
-#   rownames_to_column('party') %>%
-#   rename(theta_pres = 'wfa_pres$theta')
-# 
-# # merge dfs -- theta pres and sen
-# theta_ps <- merge(theta_pres_au, theta_sen_au, by = 'party')
+# match sen features with pres
+dfmat_sen_match <- dfm_match(dfmat_sen, featnames(dfmat_pres))
 
-# Load data frame with out of sample prediction for senate speeches
-load('data/theta/theta_ps.Rda')
+# convert to wfm
+wfm_sen <- as.wfm(dfmat_sen_match, word.margin = 2)
+
+# predict values to senate speeches
+theta_sen_au <- as.data.frame(predict(wfa_pres, newdata = wfm_sen)) %>%
+  rownames_to_column('party') %>%
+  rename(theta_sen_au = 'predict(wfa_pres, newdata = wfm_sen)')
+
+# pres scores
+theta_pres_au <- as.data.frame(wfa_pres$theta, wfa_pres$docs) %>%
+  rownames_to_column('party') %>%
+  rename(theta_pres = 'wfa_pres$theta')
+
+# merge dfs -- theta pres and sen
+theta_ps <- merge(theta_pres_au, theta_sen_au, by = 'party')
 
 # Compare pres x sen
 theta_ps %>% 
@@ -428,7 +423,7 @@ Comparing the economy graph for Wordfish with the main graph, we do not see much
 #dfmat_econ[11, 1]
 
 # Wordfish for economy DFM
-wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(19, 11), sparse = TRUE) # PT and PR
+wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(16, 6), sparse = TRUE) # PT and PR
 
 
 # Plot economy and main DFM graphs
@@ -503,7 +498,7 @@ dfmat_sec <- speech_df %>%
       stem = FALSE,  
       groups = 'Partido')
 
-dfmat_sec <- dfm_select dfmat_sec, min_nchar = 2)
+dfmat_sec <- dfm_select(dfmat_sec, min_nchar = 2)
 ```
 
 ### Scaling
