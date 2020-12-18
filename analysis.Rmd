@@ -212,7 +212,9 @@ gridExtra::grid.arrange(state_sen, state_speech)
 
 
 ## Speeches Scaling {.tabset}
+
 First, we use Wordfish as the text scaling method for the Senate speeches. After, as shown below, we plot the results of a fitted scaling model. 
+
 ```{r RILE_speaches}
 # Wordfish
 wf <- textmodel_wordfish(dfmat_sen, dir = c(20, 11), sparse = TRUE)
@@ -254,6 +256,12 @@ merge(theta_sen_wf, cemf_2019, by = 'party') %>%
   theme_minimal() +
   theme(legend.position = 'none') 
 ```
+
+
+```{r}
+# Media and number of senators
+```
+
 
 ### 2018's Presidential Manifestos
 
@@ -360,11 +368,12 @@ merge(theta_sen_wf, theta_sen_au, by = 'party') %>%
 
 
 # Themes
+
 Having assessed how the parties in senate are positioned in the RILE Scale, let's check how the discussions on the three topics of Bolsonaro's agenda appear in the Senate House. 
 
 For this section, we employed a dictionary analysis, identifying a few words with each topic in order to classify the corpus accordingly.
 
-We initially consulted the  “LexiCoder Policy Agenda” dictionary to have a baseline for words that could capture these main topics. We then translated to Portuguese and adapted to Brazilian context. 
+We initially consulted the  “LexiCoder Policy Agenda” dictionary to have a baseline for words that could capture these main topics. We then translated the words to Portuguese and adapted them to the Brazilian context. 
 
 In the following sections, we will analyze the three aforementioned dimensions under the topics Economy, Security and Gender & Family. 
 
@@ -433,7 +442,7 @@ The graph displays words that push a document farthest to the left or to the rig
 
 The words that most contributed for a left-leaning document are *petrobrás (an oil extracting public company whose privatization is a contentious topic), anticapitalista ("anticapitalist"), cut ("centralized labour union"),  auxílio-doença ("illness aid",an employment benefit), sindicalista* ("unionist") and *terceirização* ("outsourcing"). For the right, the words are *militarismo ("militarism"), agroindustriais ("agribusiness"), grevista ("striker"), veterinária ("veterinarian"), logística* ("logistics") and *transportes* ("transport"). 
 
-In general, the right discusses angrucultura (agribusiness), with words like empreendedorismo ("entrepeneurship")/ liberalismo ("liberalism"), logística ("logistics") /infraestrutura ("infrastructure").
+In general, the right discusses agriculture (agribusiness), with words like empreendedorismo ("entrepeneurship")/ liberalismo ("liberalism"), logística ("logistics") /infraestrutura ("infrastructure").
 
 The left discusses previdência ("pension benefits"), with words like trabalhadores ("workers"), direitos ("rights"), macroeconomia ("macroeconomics"), sindicalismo ("trade unionism").
 
@@ -475,7 +484,6 @@ ggplot(scores_econ, aes(beta, psi, label = word)) +
 
 To extract documents that discuss security topics, we filtered documents that have higher scores on the security dictionary when compared to the economy and gender & family dictionaries.
 
-
 ```{r Security_analysis}
 # List with documents about security
 sec_id <- theme_df %>% 
@@ -494,11 +502,12 @@ dfmat_sec <- speech_df %>%
       remove_symbols = TRUE,
       stem = FALSE,  
       groups = 'Partido')
-dfmat_sec <- dfm_select (dfmat_sec, min_nchar = 2)
 
+dfmat_sec <- dfm_select dfmat_sec, min_nchar = 2)
 ```
 
 ### Scaling
+
 Comparing the security graph for Wordfish with the main graph, we see a lot of change in party positions. This may suggest that security bears a smaller weight into defining general parties positions, and/or there is a lot of overlap in the security vocabulary used by senators across the spectrum.
 
 ```{r}
@@ -514,15 +523,16 @@ gridExtra::grid.arrange(textplot_scale1d(wf_sec), textplot_scale1d(wf), ncol = 2
 ```
 
 ### RILE Features
+
 The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -1.5 to 1.5.
 
 The words that most contributed for a left-leaning document are defensoria ("public attorney office"), defensores ("public attorneys"), direitos ("rights"), humanos ("human"), perseguição ("harassment"), liberdade ("freedom") . For the right, the words are vagabundo(s) ("tramps"), juvenis ("juvenile"), tropa ("troop"), pcc (the largest gang in SP), farda ("police suit").
 
 In general, the right discusses crime, criminals and law enforcement activities, while the left discusses human rights and judicial harassment.
 
-Interestingly, the use of cadeia ("jail") and prisão ("prison"), which are synonyms in Portuguese, seem associated with speeches in different sides of the RILE spectrum. Similarly, the word vagabundagem (iddleness that characterizes a tramp) and vagabundo (s) ("tramp") are also associated with different sides of RILE.
+Interestingly, the use of cadeia ("jail") and prisão ("prison"), which are synonyms in Portuguese, seem associated with speeches in different sides of the RILE spectrum. Similarly, the word vagabundagem (idleness that characterizes a tramp) and vagabundo (s) ("tramp") are also associated with different sides of RILE.
 
-Finally, "feminicídio" (a relatively new criminal offense for an aggravated homicide committed against a woman by her former romantic partner), which is a diferenciation to standard homicide typically criticized by right wing politicians with a conservative view of gender issues, is the word that appears most strongly associated with a right-leaning political view.
+Finally, "feminicídio" (a relatively new criminal offense for an aggravated homicide committed against a woman by her former romantic partner), which is a differentiation to standard homicide typically criticized by right wing politicians with a conservative view of gender issues, is the word that appears most strongly associated with a right-leaning political view.
 
 ```{r}
 # Features usage left/right
