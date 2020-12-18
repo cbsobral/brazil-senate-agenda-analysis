@@ -159,11 +159,13 @@ party_speech <- speech_df %>%
 gridExtra::grid.arrange(party_sen, party_speech)
 ```
 ```{r Prop_Speeches_Party, message=FALSE, warning=FALSE}
+# Number of speeches
 n_speeches <- speech_df %>% 
   group_by(Partido) %>% 
   summarise(Speeches = n()) %>%
   mutate(Prop_Speeches = round((Speeches / sum(Speeches))*100, 2))
 
+# Number of senators/total
 n_senators <- sen_df %>% 
   rename(Partido = 'party_abbr') %>% 
   group_by(Partido) %>% 
@@ -176,16 +178,14 @@ merge(n_speeches, n_senators, by = 'Partido') %>%
   arrange(desc(Prop_Speeches)) %>% 
   mutate(diff = Prop_Speeches - Prop_Senators) %>% 
   group_by(Partido) %>% 
-  # summarise(n = n()) %>%
-  ggplot(aes(Partido, diff, label = diff)) +
-  geom_col(fill = '#F8766D') +
-  # geom_text(size = 2.5, nudge_y = -1) +
+  ggplot(aes(Partido, diff, label = diff, fill = ifelse(diff < 0, '#00BFC4', '#F8766D'))) +
+  geom_col() +
   geom_text(aes(y = diff + 2 * sign(diff), label = diff), 
             position = position_dodge(width = 0.9)) +
   ylab('XXXXXXX') +
-  xlab('Parties in Senate') +
+  xlab('Party') +
   theme_classic() +
-  theme(axis.text.x = element_text(angle = 90))
+  theme(axis.text.x = element_text(angle = 90), legend.position = 'none') 
 ```
 
 ```{r}
@@ -503,18 +503,18 @@ wf_econ <- textmodel_wordfish(dfmat_econ, dir = c(16, 6), sparse = TRUE) # PT an
 
 # Plot economy and main DFM graphs
 gridExtra::grid.arrange(textplot_scale1d(wf_econ), textplot_scale1d(wf), ncol = 2, 
-                        bottom = "Economy DFM --- Main DFM")
+                        bottom = 'Economy DFM --- Main DFM')
 ```
 
 ### RILE Features
 
 The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -2.5 to 2. 
 
-The words that most contributed for a left-leaning document are *petrobrás (an oil extracting public company whose privatization is a contentious topic), anticapitalista ("anticapitalist"), cut ("centralized labour union"),  auxílio-doença ("illness aid",an employment benefit), sindicalista* ("unionist") and *terceirização* ("outsourcing"). For the right, the words are *militarismo ("militarism"), agroindustriais ("agribusiness"), grevista ("striker"), veterinária ("veterinarian"), logística* ("logistics") and *transportes* ("transport"). 
+The words that most contributed for a left-leaning document are *petrobrás (an oil extracting public company whose privatization is a contentious topic), anticapitalista ('anticapitalist'), cut ('centralized labour union'),  auxílio-doença ('illness aid',an employment benefit), sindicalista* ('unionist') and *terceirização* ('outsourcing'). For the right, the words are *militarismo ('militarism'), agroindustriais ('agribusiness'), grevista ('striker'), veterinária ('veterinarian'), logística* ('logistics') and *transportes* ('transport'). 
 
-In general, the right discusses agriculture (agribusiness), with words like empreendedorismo ("entrepeneurship")/ liberalismo ("liberalism"), logística ("logistics") /infraestrutura ("infrastructure").
+In general, the right discusses agriculture (agribusiness), with words like empreendedorismo ('entrepeneurship')/ liberalismo ('liberalism'), logística ('logistics') /infraestrutura ('infrastructure').
 
-The left discusses previdência ("pension benefits"), with words like trabalhadores ("workers"), direitos ("rights"), macroeconomia ("macroeconomics"), sindicalismo ("trade unionism").
+The left discusses previdência ('pension benefits'), with words like trabalhadores ('workers'), direitos ('rights'), macroeconomia ('macroeconomics'), sindicalismo ('trade unionism').
 
 ```{r}
 # Features usage left/right
@@ -589,20 +589,20 @@ Comparing the security graph for Wordfish with the main graph, we see a lot of c
 wf_sec <- textmodel_wordfish(dfmat_sec, dir = c(18, 10), sparse = TRUE)
 
 gridExtra::grid.arrange(textplot_scale1d(wf_sec), textplot_scale1d(wf), ncol = 2, 
-                        bottom = "Security DFM --- Main DFM")
+                        bottom = 'Security DFM --- Main DFM')
 ```
 
 ### RILE Features
 
 The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -1.5 to 1.5.
 
-The words that most contributed for a left-leaning document are defensoria ("public attorney office"), defensores ("public attorneys"), direitos ("rights"), humanos ("human"), perseguição ("harassment"), liberdade ("freedom") . For the right, the words are vagabundo(s) ("tramps"), juvenis ("juvenile"), tropa ("troop"), pcc (the largest gang in SP), farda ("police suit").
+The words that most contributed for a left-leaning document are defensoria ('public attorney office'), defensores ('public attorneys'), direitos ('rights'), humanos ('human'), perseguição ('harassment'), liberdade ('freedom') . For the right, the words are vagabundo(s) ('tramps'), juvenis ('juvenile'), tropa ('troop'), pcc (the largest gang in SP), farda ('police suit').
 
 In general, the right discusses crime, criminals and law enforcement activities, while the left discusses human rights and judicial harassment.
 
-Interestingly, the use of cadeia ("jail") and prisão ("prison"), which are synonyms in Portuguese, seem associated with speeches in different sides of the RILE spectrum. Similarly, the word vagabundagem (idleness that characterizes a tramp) and vagabundo (s) ("tramp") are also associated with different sides of RILE.
+Interestingly, the use of cadeia ('jail') and prisão ('prison'), which are synonyms in Portuguese, seem associated with speeches in different sides of the RILE spectrum. Similarly, the word vagabundagem (idleness that characterizes a tramp) and vagabundo (s) ('tramp') are also associated with different sides of RILE.
 
-Finally, "feminicídio" (a relatively new criminal offense for an aggravated homicide committed against a woman by her former romantic partner), which is a differentiation to standard homicide typically criticized by right wing politicians with a conservative view of gender issues, is the word that appears most strongly associated with a right-leaning political view.
+Finally, 'feminicídio' (a relatively new criminal offense for an aggravated homicide committed against a woman by her former romantic partner), which is a differentiation to standard homicide typically criticized by right wing politicians with a conservative view of gender issues, is the word that appears most strongly associated with a right-leaning political view.
 
 ```{r}
 # Features usage left/right
@@ -685,16 +685,16 @@ wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(16, 6), sparse = TRUE) # P
 
 # Plot gender and family and main DFM graphs
 gridExtra::grid.arrange(textplot_scale1d(wf_genfam), textplot_scale1d(wf), ncol = 2, 
-                        bottom = "Gender and Family DFM --- Main DFM")
+                        bottom = 'Gender and Family DFM --- Main DFM')
 ```
 
 ### RILE Features
 
 The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -0.5 to 0.5.
 
-The word that most contributes for a left-leaning document is resistência ("resistance"). The words that most contribute to a right-leaning document are tradicional ("traditional") and esposa ("wife). All the other words are really close to the center. 
+The word that most contributes for a left-leaning document is resistência ('resistance'). The words that most contribute to a right-leaning document are tradicional ('traditional') and esposa ('wife). All the other words are really close to the center. 
 
-Finally, words that we expected to be highly significant don't even appear in speeches. Some examples are sexista ("sexist") and "gay".
+Finally, words that we expected to be highly significant don't even appear in speeches. Some examples are sexista ('sexist') and 'gay'.
 
 ```{r}
 # Features usage left/right
