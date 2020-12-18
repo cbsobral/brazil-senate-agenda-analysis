@@ -508,7 +508,7 @@ Comparing the security graph for Wordfish with the main graph, we see a lot of c
 ```{r}
 # Wordfish for sec
 #dfmat_sec[18, 1] #PT
-#dfmat_sec[10, 1]# PR
+#dfmat_sec[10, 1]# PL
 
 #wordfish for security DFM
 wf_sec <- textmodel_wordfish(dfmat_sec, dir = c(18, 10), sparse = TRUE)
@@ -580,7 +580,7 @@ genfam_id <- theme_df %>%
   filter(genfam > security & genfam > economy) %>% 
   pull(doc_id)
 
-# DFM with econ documents
+# DFM with genfam documents
 dfmat_genfam <- speech_df %>% 
   subset(CodigoPronunciamento %in% genfam_id) %>% 
   corpus(docid_field = 'CodigoPronunciamento', text_field = 'Pronunciamento') %>% 
@@ -598,17 +598,28 @@ dfmat_genfam <- dfm_trim(dfmat_genfam, min_termfreq = 2, min_docfreq = 2)
 
 ### Scaling
 
+Comparing the gender and family graph for Wordfish with the main graph, we see some change in party positions. The party PT is considered extreme left on the main DFM, while left on the genfam DFM. Topics included in gender and family might not be one of the main drivers behind the allocation of parties in the RILE spectrum. Furthermore, this suggests that genfam bears a smaller weight into defining general parties positions, and/or there is a lot of overlap in the genfam vocabulary used by senators across the spectrum.
+
 ```{r}
-# Wordfish for econ
-dfmat_genfam[19, 1]
-dfmat_genfam[11, 1]
+# Wordfish for gender and family
+#dfmat_genfam[16, 1]
+#dfmat_genfam[6, 1]
 
-wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(19, 11), sparse = TRUE) # PT and PR
+# Wordfish for gender and family DFM
+wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(16, 6), sparse = TRUE) # PT and PL
 
-textplot_scale1d(wf_genfam)
+# Plot gender and family and main DFM graphs
+gridExtra::grid.arrange(textplot_scale1d(wf_genfam), textplot_scale1d(wf), ncol = 2, 
+                        bottom = "Gender and Family DFM --- Main DFM")
 ```
 
 ### RILE Features
+
+The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -0.5 to 0.5.
+
+The word that most contributes for a left-leaning document is resistência ("resistance"). The words that most contribute to a right-leaning document are tradicional ("traditional") and esposa ("wife). All the other words are really close to the center. 
+
+Finally, words that we expected to be highly significant don't even appear in speeches. Some examples are sexista ("sexist") and "gay".
 
 ```{r}
 # Features usage left/right
@@ -619,33 +630,29 @@ feat_genfam <- data.frame(
   stringsAsFactors = FALSE)
 
 # # Left
-# feat_genfam %>% 
-#   top_n(200, psi) %>% 
-#   top_n(-20, beta)
-# 
+#feat_genfam %>% 
+#top_n(200, psi) %>% 
+#top_n(500, beta)
+ 
 # # Right
-# feat_genfam %>% 
-#   top_n(200, psi) %>% 
-#   top_n(20, beta) 
+#feat_genfam %>% 
+#top_n(200, psi) %>% 
+#top_n(20, beta) 
 ```
 
 ```{r}
-words_genfam <- c('kit gay', 'just*', 'tradicional', 'mulher', 'gênero', 'feminis*', 'juventude', 'gay',
-                  'jovem', 'família')
+# Select words for graph
+words_genfam <- c('kit gay', 'tradicional', 'mulher', 'gênero', 'sexo', 'homem', 'feminis*', 'juventude', 'gay', 'jovem', 'jovens', 'família', 'sexista', 'resistência', 'direito', 'crianças', 'mãe*', 'pai', 'justiça', 'feminina', 'marido', 'esposa', 'casal')
 
+#Extract scores
 scores_genfam <- arrange(filter(feat_genfam, word %in% words_genfam), beta)
 
-##### mostrar palavras mais à direita e à esquerda
-scores_genfam %>% 
-  arrange(desc(beta)) %>%  # tirar o desc para mostrar palavras da esquerda == arrange(beta)
-  select(word)
-
-
+# Plot words on the RILE scale 
 ggplot(scores_genfam, aes(beta, psi, label = word)) +
-  geom_point(color = 'grey', alpha = 0.2) +
+  geom_point(color = ifelse(scores_genfam$beta > 0, '#00BFC4', '#F8766D')) +
   geom_text_repel(data = scores_genfam, col = 'black') +
-  geom_point(data = scores_genfam) +
   labs(x = 'Word Score', y = 'Word Frequency') +
-  ggtitle('Estimated Word Positions for Selected Debate Vocabulary') +
+  ggtitle('Estimated Word Positions for Gender and Family Vocabulary') + geom_vline(xintercept = c(0,0), linetype = 'dotted') +
   theme_minimal()
+
 ```
