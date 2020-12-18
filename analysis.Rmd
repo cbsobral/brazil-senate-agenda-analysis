@@ -60,7 +60,6 @@ load('data/sen_df.Rda')
 # Load speeches data frame
 load('data/speech_df.Rda')
 
-
 # Main Corpus 
 corp_sen <- corpus(speech_df, docid_field = 'CodigoPronunciamento', 
                    text_field = 'Pronunciamento')
@@ -121,9 +120,10 @@ merge(expected, observed, by = 'Gender') %>%
   select(Gender, prop_sen, prop_speech) %>% 
   pivot_longer(!Gender, names_to = 'Proportion', values_to = 'Value') %>% 
   mutate(across(is.numeric, ~ round(., 2))) %>% 
-  ggplot(aes(Value, Proportion, group = Gender, fill = Gender, label = Value)) +
+  ggplot(aes(Value, Proportion, group = Gender, fill = Gender)) +
   geom_col(position = 'dodge') + 
-  geom_label(position = position_dodge(0.9), show.legend = FALSE) +
+  geom_text(aes(label = Value), position = position_dodge(0.9), 
+            show.legend = FALSE, vjust = -0.5) +
   coord_flip() +
   theme_minimal()
 ```
@@ -173,7 +173,41 @@ n_senators <- sen_df %>%
 
 merge(n_speeches, n_senators, by = 'Partido') %>% 
   select(Partido, Prop_Senators, Prop_Speeches) %>% 
-  arrange(desc(Prop_Speeches))
+  arrange(desc(Prop_Speeches)) %>% 
+  mutate(diff = Prop_Speeches - Prop_Senators) %>% 
+  group_by(Partido) %>% 
+  # summarise(n = n()) %>%
+  ggplot(aes(Partido, diff, label = diff)) +
+  geom_col(fill = '#F8766D') +
+  # geom_text(size = 2.5, nudge_y = -1) +
+  geom_text(aes(y = diff + 2 * sign(diff), label = diff), 
+            position = position_dodge(width = 0.9)) +
+  ylab('XXXXXXX') +
+  xlab('Parties in Senate') +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+```{r}
+# Party Changes
+change <- speech_df %>% 
+  group_by(Nome, Partido) %>% 
+  count() 
+
+# Create List 
+list_change <- change %>% 
+  group_by(Nome) %>% 
+  count() %>% 
+  filter(n > 1) %>% 
+  pull(Nome)
+
+# Subset
+final_change <- change %>% 
+  subset(Nome %in% list_change) %>% 
+  select(Nome, Partido)
+
+# Print
+final_change
 ```
 
 
@@ -242,13 +276,15 @@ load('data/cemf_2019.Rda') # party position per media outlet
 cemf_2019 <-  cemf_2019 %>% 
   mutate(score = if_else(pos == 'centro', 0, if_else(pos == 'esquerda', -1, 1)))
 
-merge(theta_sen_wf, cemf_2019, by = 'party') %>% 
+scores <- merge(theta_sen_wf, cemf_2019, by = 'party') 
+
+scores %>% 
   arrange(score) %>%    
   mutate(party = factor(party, levels = party)) %>% 
   ggplot(aes(x = theta_sen_wf, y = score, label = party, col = party)) + 
   geom_point() + 
   geom_label_repel(show.legend = FALSE) +
-  geom_abline() +
+  geom_abline(linetype = 'dotted') +
   xlim(-2.5, 3) +
   ylim(-2.5, 3) +
   ylab('Media Position') +
@@ -258,8 +294,47 @@ merge(theta_sen_wf, cemf_2019, by = 'party') %>%
 ```
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # Media and number of senators
+sen_df %>% 
+  group_by(party_abbr) %>% 
+  summarise(n = n()) %>% 
+  rename(party = 'party_abbr') %>% 
+  merge(scores, by = 'party') %>%  
+  arrange(score) %>%    
+  mutate(party = factor(party, levels = party)) %>% 
+  ggplot(aes(x = theta_sen_wf, y = score, size = n, color = party)) + 
+  geom_point() + 
+  geom_label_repel(aes(label = party), size = 3) +
+  scale_size_area(max_size = 16) +
+  geom_abline(linetype = 'dotted') +
+  xlim(-2.5, 3) +
+  ylim(-2.5, 3) +
+  ylab('Media Position') +
+  xlab('Wordfish Position') +
+  theme_minimal() +
+  theme(legend.position = 'none') 
+
+
+# Media and number of speeches
+speech_df %>% 
+  group_by(Partido) %>% 
+  summarise(n = n()) %>% 
+  rename(party = 'Partido') %>% 
+  merge(scores, by = 'party') %>%  
+  arrange(score) %>%    
+  mutate(party = factor(party, levels = party)) %>% 
+  ggplot(aes(x = theta_sen_wf, y = score, size = n, color = party)) + 
+  geom_point() + 
+  geom_label_repel(aes(label = party), size = 3) +
+  scale_size_area(max_size = 16) +
+  geom_abline(linetype = 'dotted') +
+  xlim(-2.5, 3) +
+  ylim(-2.5, 3) +
+  ylab('Media Position') +
+  xlab('Wordfish Position') +
+  theme_minimal() +
+  theme(legend.position = 'none')
 ```
 
 
@@ -287,7 +362,7 @@ dfmat_pres <- dfm(corp_pres,
 dfmat_pres <- dfm_select(dfmat_pres, min_nchar = 2)
 ```
 
-
+<br>
 #### Parties in 2018's Presidential Election 
 
 The graph illustrates the party positions derived from the Presidential manifestos (Y-axis) and the Senate speeches (X-axis) using `wordfish` prediction. 
@@ -328,7 +403,7 @@ theta_ps %>%
   ggplot(aes(x = theta_pres, y = theta_sen_au, label = party, col = party)) + 
   geom_point() + 
   geom_label_repel(show.legend = FALSE) +
-  geom_abline() +
+  geom_abline(linetype = 'dotted') +
   xlim(-2, 2) +
   ylim(-2, 2) +
   ylab('Position from Presidential Corpus') +
@@ -337,7 +412,7 @@ theta_ps %>%
   theme(legend.position = 'none') 
 ```
 
-
+<br>
 #### All Senate Parties
 
 The graph shows the party positions derived from the Presidential manifestos (Y-axis) using `austin` prediction and the Senate speeches (X-axis) using `wordfish` prediction. 
@@ -352,7 +427,7 @@ merge(theta_sen_wf, theta_sen_au, by = 'party') %>%
   ggplot(aes(x = theta_sen_wf, y = theta_sen_au, label = party, col = party)) + 
   geom_point() + 
   geom_label_repel(show.legend = FALSE) +
-  geom_abline() +
+  geom_abline(linetype = 'dotted') +
   xlim(-3, 3) +
   ylim(-3, 3) +
   ylab('Position from Presidential Corpus') +
