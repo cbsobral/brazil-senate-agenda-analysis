@@ -612,34 +612,19 @@ feat_sec <- data.frame(
   psi = wf_sec$psi,
   stringsAsFactors = FALSE)
 
-
-# # Left
-# feat_sec %>% 
-#   top_n(200, psi) %>% 
-#   top_n(-10, beta)
-# 
-# # Right
-# feat_sec %>% 
-#   top_n(200, psi) %>% 
-#   top_n(10, beta) 
-```
-
-```{r}
 # Select words for graph
 words_sec <- c('bandidagem','direitos', 'humanos','juiz','perseguição', 'liberdade', 'defesa','violência','cadeia', 'prisão', 'vagabundo', 'vagabundos', 'vagabundagem', 'defensoria','defensores', 'militares', 'policial', 'tropa', 'farda','polícia', 'pcc', 'juvenis','arma', 'tiro', 'feminicídio', 'fiança','militar')
               
 # Extract scores
-
-scores_sec <- arrange(filter(feat_sec, word %in% words_sec),
-                      beta)
+scores_sec <- arrange(filter(feat_sec, word %in% words_sec), beta)
 
 # Plot words on the RILE scale
-
 ggplot(scores_sec, aes(beta, psi, label = word)) +
   geom_point(color = ifelse(scores_sec$beta > 0, '#00BFC4', '#F8766D')) +
   geom_text_repel(data = scores_sec, col = 'black') +
   labs(x = 'Word Score', y = 'Word Frequency') +
-  ggtitle('Estimated Word Positions for Security Vocabulary') + geom_vline(xintercept = c(0,0), linetype = 'dotted') +
+  ggtitle('Estimated Word Positions for Security Vocabulary') + geom_vline(xintercept = c(0,0), 
+                                                                           linetype = 'dotted') +
   theme_minimal()
 ```
 
@@ -676,10 +661,6 @@ dfmat_genfam <- dfm_trim(dfmat_genfam, min_termfreq = 2, min_docfreq = 2)
 Comparing the gender and family graph for Wordfish with the main graph, we see some change in party positions. The party PT is considered extreme left on the main DFM, while left on the genfam DFM. Topics included in gender and family might not be one of the main drivers behind the allocation of parties in the RILE spectrum. Furthermore, this suggests that genfam bears a smaller weight into defining general parties positions, and/or there is a lot of overlap in the genfam vocabulary used by senators across the spectrum.
 
 ```{r}
-# Wordfish for gender and family
-#dfmat_genfam[16, 1]
-#dfmat_genfam[6, 1]
-
 # Wordfish for gender and family DFM
 wf_genfam <- textmodel_wordfish(dfmat_genfam, dir = c(16, 6), sparse = TRUE) # PT and PL
 
@@ -692,7 +673,7 @@ gridExtra::grid.arrange(textplot_scale1d(wf_genfam), textplot_scale1d(wf), ncol 
 
 The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -0.5 to 0.5.
 
-The word that most contributes for a left-leaning document is resistência ('resistance'). The words that most contribute to a right-leaning document are tradicional ('traditional') and esposa ('wife). All the other words are really close to the center. 
+The word that most contributes for a left-leaning document is resistência ('resistance'). The words that most contribute to a right-leaning document are tradicional ('traditional') and esposa ('wife'). All the other words are really close to the center. 
 
 Finally, words that we expected to be highly significant don't even appear in speeches. Some examples are sexista ('sexist') and 'gay'.
 
@@ -704,15 +685,15 @@ feat_genfam <- data.frame(
   psi = wf_genfam$psi,
   stringsAsFactors = FALSE)
 
-# # Left
-#feat_genfam %>% 
-#top_n(200, psi) %>% 
-#top_n(500, beta)
- 
-# # Right
-#feat_genfam %>% 
-#top_n(200, psi) %>% 
-#top_n(20, beta) 
+# # # Left
+# feat_genfam %>% 
+#   top_n(10000, psi) %>% 
+#   top_n(50, beta)
+#  
+# # # Right
+# feat_genfam %>% 
+#   top_n(200, psi) %>% 
+#   top_n(20, beta) 
 ```
 
 ```{r}
@@ -727,9 +708,11 @@ ggplot(scores_genfam, aes(beta, psi, label = word)) +
   geom_point(color = ifelse(scores_genfam$beta > 0, '#00BFC4', '#F8766D')) +
   geom_text_repel(data = scores_genfam, col = 'black') +
   labs(x = 'Word Score', y = 'Word Frequency') +
-  ggtitle('Estimated Word Positions for Gender and Family Vocabulary') + geom_vline(xintercept = c(0,0), linetype = 'dotted') +
+  ggtitle('Estimated Word Positions for Gender and Family Vocabulary') + geom_vline(xintercept = 
+          c(0,0), linetype = 'dotted') +
   theme_minimal()
 ```
+
 
 # Conclusion 
 
@@ -738,6 +721,3 @@ From the analyses made in this project, we understand that it is not all the vie
 The themes and famous phrases mentioned by the current President, which are mostly propagated by the Media, are not present in the same intensity in the Senate environment. On the other hand, this might be related to the percentage of representation of each party in the Senate. Take PT as an example; it is one of the main opposition parties to Bolsonaro and has a large Senate representation. Thus, most of their speeches are against what is defended by the President. 
 
 When analyzing the three main themes highlighted in Bolsonaro’s campaign, the economy is the most present in the Senate. In comparison, security, gender, and family appear less frequently, respectively.
-
-
-
