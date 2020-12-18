@@ -265,9 +265,6 @@ merge(theta_sen_wf, cemf_2019, by = 'party') %>%
 
 ### 2018's Presidential Manifestos
 
-The graph illustrates the party positions from the Presidential corpus (Y-axis) and the Senate corpus (X-axis). 
-
-It is possible to see a pattern where parties are mostly allocated to the right when using Senate speeches. Although, when analyzing Presidential manifestos, parties are mostly allocated to the left. There is one exception of PDT, which is around the center spectrum on Presidential corpus, and on the extreme left for the Senate corpus. 
 
 ```{r Presidential_Campaign}
 # Load data frame with presidential election manifestos
@@ -293,8 +290,9 @@ dfmat_pres <- dfm_select(dfmat_pres, min_nchar = 2)
 
 #### Parties in 2018's Presidential Election 
 
-All parties have more extreme values in the presidential manifestos. PT and PDT are more to the left on presidential manifestos, while the remaining parties are more to the right. 
+The graph illustrates the party positions derived from the Presidential manifestos (Y-axis) and the Senate speeches (X-axis) using `wordfish` prediction. 
 
+It is possible to see a pattern where parties are mostly allocated to the right when using Senate speeches. Although, when analyzing Presidential manifestos, parties are mostly allocated to the left. There is one exception of PDT, which is around the center spectrum on Presidential corpus, and on the extreme left for the Senate corpus. 
 
 ```{r message=FALSE, warning=FALSE}
 # austin
@@ -342,7 +340,9 @@ theta_ps %>%
 
 #### All Senate Parties
 
-Party positions derived from presidential manifestos (using `austin` prediction for out of sample documents) are more centered. Wordfish positions are more polarized. 
+The graph shows the party positions derived from the Presidential manifestos (Y-axis) using `austin` prediction and the Senate speeches (X-axis) using `wordfish` prediction. 
+
+We see that `austin` predictions are more centered, while `wordfish` is more polarized. For example, PL is on the cneter spectrum for the first and the extreme right for the second.
 
 ```{r}
 # Compare sen wordfish x sen/pres austin
@@ -642,7 +642,7 @@ feat_genfam <- data.frame(
 
 ```{r}
 # Select words for graph
-words_genfam <- c('kit gay', 'tradicional', 'mulher', 'gênero', 'sexo', 'homem', 'feminis*', 'juventude', 'gay', 'jovem', 'jovens', 'família', 'sexista', 'resistência', 'direito', 'crianças', 'mãe*', 'pai', 'justiça', 'feminina', 'marido', 'esposa', 'casal')
+words_genfam <- c('tradicional', 'mulher', 'gênero', 'sexo', 'homem', 'feminista', 'juventude', 'jovem', 'jovens', 'família', 'resistência', 'direito', 'crianças', 'mãe', 'mães', 'pai', 'justiça', 'feminina', 'marido', 'esposa', 'casal')
 
 #Extract scores
 scores_genfam <- arrange(filter(feat_genfam, word %in% words_genfam), beta)
@@ -654,5 +654,15 @@ ggplot(scores_genfam, aes(beta, psi, label = word)) +
   labs(x = 'Word Score', y = 'Word Frequency') +
   ggtitle('Estimated Word Positions for Gender and Family Vocabulary') + geom_vline(xintercept = c(0,0), linetype = 'dotted') +
   theme_minimal()
-
 ```
+
+# Conclusion 
+
+From the analyses made in this project, we understand that it is not all the views present in the populist discourse of President Jair Bolsonaro that are also present in the speeches of the Brazilian Senate.
+
+The themes and famous phrases mentioned by the current President, which are mostly propagated by the Media, are not present in the same intensity in the Senate environment. On the other hand, this might be related to the percentage of representation of each party in the Senate. Take PT as an example; it is one of the main opposition parties to Bolsonaro and has a large Senate representation. Thus, most of their speeches are against what is defended by the President. 
+
+When analyzing the three main themes highlighted in Bolsonaro’s campaign, the economy is the most present in the Senate. In comparison, security, gender, and family appear less frequently, respectively.
+
+
+
