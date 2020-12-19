@@ -1,7 +1,12 @@
 ---
-title: 'Brazilian Senate Speeches'
+title: "NAME TADA Final Report"
+subtitle: "NAME"
+author: 
+  - name: Ana Benevides, Carol Sobral, Stefania Molina
+date: "`r Sys.Date()`" 
 output: 
-  html_document: 
+  html_document:
+    code_folding: hide 
     toc: yes
     theme: paper
     toc_float:
@@ -9,28 +14,25 @@ output:
     df_print: kable
 ---
 
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
 ```
-
 
 ```{r message=FALSE, warning=FALSE}
 library(dplyr)
-library(ggrepel)
 library(ggplot2)
+library(ggrepel)
 library(tidyverse)
 library(tidytext)
 library(quanteda)
 library(quanteda.textmodels)
-library(topicmodels)
 library(austin)
 ```
 
 # Introduction
 <style> body {text-align: justify} </style>
 
-With the support of a Party coalition named “Brazil above everything, God above everyone”, Bolsonaro was elected, in 2018, president of Brazil for the 2019-2022 term. Having served as congress representative (“deputado federal”) for the State of Rio de Janeiro since 1991, Bolsonaro reached notoriety for his populist,  sexist, homophobic, anti-human rights, and often anti-democratic political views.
+With the support of a Party coalition named “Brazil above everything, God above everyone”, Bolsonaro was elected, in 2018, president of Brazil for the 2019-2022 term. Having served as congress representative (“deputado federal”) for the State of Rio de Janeiro since 1991, Bolsonaro reached notoriety for his populist and often sexist, homophobic, anti-human rights, anti-democratic political views.
 
 After 4 consecutive elections of a left party (“Labour Party”, i.e. “Partido do Trabalhadores” – PT) for the presidency of Brazil, and in the aftermath of a controversial conviction of its most prominent leader -- and front runner in the election polls --  on corruption charges, Bolsonaro benefited from a rise in anti-leftness sentiment and took the leadership of the poll of candidates with a manifesto that was filled with religious/Christian language and that was based on three pillars, that were directly opposed to the agenda of left/progressive groups:
 	
@@ -40,7 +42,6 @@ After 4 consecutive elections of a left party (“Labour Party”, i.e. “Parti
 	
 3. Conservative Moral agenda: opposition of sex education in schools; opposition to policies that aim at extending equality of rights for LGBT people; opposition to pregnancy termination, even in the limited circumstances allowed in Brazilian Law (rape; health risk for the woman; anencephaly of the fetus); reinforcement of gender stereotypical roles.    
 	
-	
 For this project, we are interested in assessing if, and to what extent, these three axes that constitute Bolsonaro’s political agenda are also resonating in the Brazilian Senate.
 	
 Brazil’s Senate House is composed of 3 senators per State and the Federal District, totaling 81 senators. Each of their term in office last for 8 years,  but the election cycle happens every 4 years, alternating the elections for 2/3 and 1/3 of the house.  Theoretically speaking, the alternate election cycle should render the Senate house less sensitive to momentary waves that, if salient in a given moment, could heavily influence the course of a presidential election. 
@@ -48,36 +49,29 @@ Brazil’s Senate House is composed of 3 senators per State and the Federal Dist
 In 2018, 2/3 of the Senate chairs were elected (54 senators), while the remaining 1/3 had still half the term in office to complete. 
 	
 In this project, we analyzed the corpus of Senators’ speeches from the years 2019-2020, focusing on issues associated with these salient dimensions of Bolsonaro’s political plan.
-	
-Finally, we assess the religious discourse as a separate trend. While the use of religion in political life seems to be at odds with the laicity of the Brazilian Constitution, it resonates both with conservative views in Brazil and the general beliefs of the majority of the constituency. We are interested, therefore, in assessing if there is any significant difference in the use of religion by Senators across the RILE spectrum. 
 
 
 # Data
 
+**WRITE: Describe data sets.**
+
+- `sen_df: 
+- `speech_df:
+- `cemf_2019:
+- `pres_df:
+
 ```{r Data_corpus_DFM}
-# Load senators data frame
+# Senators data frame
 load('data/sen_df.Rda')
 
-# Load speeches data frame
+# Senate speeches data frame
 load('data/speech_df.Rda')
 
-# Main Corpus 
-corp_sen <- corpus(speech_df, docid_field = 'CodigoPronunciamento', 
-                   text_field = 'Pronunciamento')
+# Party position per media outlet - Congresso em Foco 2019
+load('data/cemf_2019.Rda') 
 
-# Main DFM
-dfmat_sen <- dfm(corp_sen,
-  tolower = TRUE,
-  remove_punct = TRUE,
-  remove = stopwords('portuguese'),
-  remove_numbers = TRUE,
-  remove_separators = TRUE,
-  remove_symbols = TRUE,
-  stem = FALSE,  
-  groups = 'Partido')
-
-dfmat_sen <- dfm_select(dfmat_sen, min_nchar = 2)
-docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
+# 2018's presidential election manifestos
+load('data/pres_df.Rda')
 ```
 
 
@@ -85,7 +79,7 @@ docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
 
 ## General Characteristics {.tabset}
 
-Considering that the 26 States plus the Federal District each are entitled to three senates, we would expect the sen_df to have 81 senators, however, Roraima (RR) had one of its senators (Chico Rodrigues) suspended from his activities following an investigation on diversion of resources. For the purposes of this analysis, we will consider the Federal District a State.
+Considering that the 26 States plus the Federal District each are entitled to three senates, we would expect the sen_df to have 81 senators, however, Roraima (RR) had one of its senators (Chico Rodrigues) suspended from his activities following an investigation on diversion of resources. For this analysis, we will consider the Federal District a state.
 
 The Senate API only displays current senators' speeches, which is why Roraima only has 2 senators and the corpus only comprises speeches from 80 senators.
 
@@ -95,7 +89,7 @@ In terms of party distribution, 16 parties have at least one senator in the pres
 
 Looking into the distribution of gender per party, 9 of these parties have at least one Female Senator; but only 1 party (PP) has 2 Female Senators.
 
-Considering these characteristics of the Senate House, let's see if the speech distribution follows the same pattern, i.e., let's check if Females' are responsible for 1/8 of the total speeches, and how speeches are distributed among these 16 Parties, and among the 27 States.
+Considering these characteristics of the Senate House, let's see if the speech distribution follows the same pattern, i.e., let's check if Females' are responsible for 1/8 of the total speeches, and how speeches are distributed among these 16 Parties, and among the 27 states.
 
 
 ### Gender
@@ -132,7 +126,7 @@ merge(expected, observed, by = 'Gender') %>%
 
 ### Parties
 
-In what concerns the distribution of speeches per party, we expected MDB, PODEMOS, and PSD to have a higher number of speeches, as they account for a larger percentage of the Senate House. What we find out is that PT, with only 6 Senators (8% of the Senate House) has 1097 speeches (21% of the speeches). PT was the runner-off party of the 2018 elections and was the party elected for the presidential elections of 2002, 2006, 2010, and 2014. This finding might indicate a higher opposition to Bolsonaro's agenda within the Senate corpus.
+In what concerns the distribution of speeches per party, we expected MDB, PODEMOS, and PSD to have a higher number of speeches, as they account for a larger percentage of the Senate House. 
 
 ```{r Parties_Senate, message=FALSE, warning=FALSE}
 # Plot senators by party
@@ -159,6 +153,9 @@ party_speech <- speech_df %>%
 
 gridExtra::grid.arrange(party_sen, party_speech)
 ```
+
+What we find out is that PT, with only 6 Senators (8% of the Senate House) has 1097 speeches (21% of the speeches). PT was the runner-off party of the 2018 elections and was the party elected for the presidential elections of 2002, 2006, 2010, and 2014. This finding might indicate a higher opposition to Bolsonaro's agenda within the Senate corpus.
+
 ```{r Prop_Speeches_Party, message=FALSE, warning=FALSE}
 # Number of speeches
 n_speeches <- speech_df %>% 
@@ -189,6 +186,8 @@ merge(n_speeches, n_senators, by = 'Partido') %>%
   theme(axis.text.x = element_text(angle = 90), legend.position = 'none') 
 ```
 
+**WRITE**
+
 ```{r}
 # Party Changes
 change <- speech_df %>% 
@@ -216,10 +215,9 @@ final_change
 
 Our data set is composed of 5188 speeches given by 80 Senators of 27 States. Assuming each Senator uses speech opportunities equally, we would expect each State to have around 192 speeches. Let's see if this checks out.
 
-What we see, in fact, is that Senators coming from some States, such as RS, PE, DF and AP far exceed the expected average of speeches; at the same time, Senators from PB, AC and RJ seem not to have spoken as much as their peers in the period of 2019 and 2020. 
+What we see is that Senators coming from some States, such as RS, PE, DF, and AP far exceed the expected average of speeches; at the same time, Senators from PB, AC, and RJ seem not to have spoken as much as their peers in 2019 and 2020. 
 
 This might indicate that the items relevant for the agenda of the States that have more speeches might bear higher weight in the corpus.
-
 
 ```{r UF_Senate, message=FALSE, warning=FALSE}
 state_sen <- sen_df %>% 
@@ -250,28 +248,46 @@ gridExtra::grid.arrange(state_sen, state_speech)
 
 First, we use Wordfish as the text scaling method for the Senate speeches. After, as shown below, we plot the results of a fitted scaling model. 
 
+**WRITE: descrição do gráfico.**
+
 ```{r RILE_speaches}
+# Main Senate Corpus 
+corp_sen <- corpus(speech_df, docid_field = 'CodigoPronunciamento', 
+                   text_field = 'Pronunciamento')
+
+# Main Senate DFM
+dfmat_sen <- dfm(corp_sen,
+  tolower = TRUE,
+  remove_punct = TRUE,
+  remove = stopwords('portuguese'),
+  remove_numbers = TRUE,
+  remove_separators = TRUE,
+  remove_symbols = TRUE,
+  stem = FALSE,  
+  groups = 'Partido')
+
+dfmat_sen <- dfm_select(dfmat_sen, min_nchar = 2)
+docnames(dfmat_sen) <- paste(dfmat_sen$Partido)
+
 # Wordfish
 wf <- textmodel_wordfish(dfmat_sen, dir = c(16, 6), sparse = TRUE) # PT and PL
 textplot_scale1d(wf)
 ```
 
-To better understand the Senate speeches position generated with Wordfish, we compare it with the Media perception of each party and with Presidential Manifestos from 2018. 
-
-
 ### Wordfish Scores X Media {.tabset}
 
-#### Main Graph NOMEAR
+To better understand the Senate speeches position generated with Wordfish, we compare it with media perception of each party. 
 
-The graph below shows the Brazilian Media categorization (Y-axis) and the Wordfish categorization (X-axis) for each party. 
+
+#### NAME Main Graph 
+
+The graph below shows the *Congresso em Foco* (y-axis) and the Wordfish categorization (x-axis) for each party. 
 
 Some parties appear as similar positions in both situations, such as PSB, PSDB, and MDB. On the other hand, the Wordfish model considers PT on the extreme left, around -2 on the scale. In contrast, the Media considers the same party on the left, around -1 on the scale.
 
-We see the same pattern on the other side of the scale. While the Media considers PSL on the right, the Wordfish model assumes the same party in the center position. 
+We see the same pattern on the other side of the scale. While the Media considers PSL on the right, the Wordfish model assumes the same party in the center position.  
 
 ```{r RILE_media, message=FALSE, warning=FALSE}
-load('data/cemf_2019.Rda') # party position per media outlet
-
 # Code right, left, center positions 
 cemf_2019 <-  cemf_2019 %>% 
   mutate(score = if_else(pos == 'centro', 0, if_else(pos == 'esquerda', -1, 1)))
@@ -299,7 +315,9 @@ scores %>%
   theme(legend.position = 'none') 
 ```
 
-#### NOMEAR
+#### NAME Ana
+
+**WRITE**
 
 ```{r message=FALSE, warning=FALSE}
 # Media and number of senators
@@ -323,6 +341,9 @@ sen_df %>%
   theme(legend.position = 'none') 
 ```
 
+#### NAME Ana
+
+**WRITE**
 
 ```{r message=FALSE, warning=FALSE}
 # Media and number of speeches
@@ -349,14 +370,9 @@ speech_df %>%
 
 ### 2018's Presidential Manifestos {.tabset}
 
-**Write intro here**
-
-#### Data
+In this section, we compare Senate speeches position generated with Wordfish with presidential manifestos from 2018. 
 
 ```{r Presidential_Campaign}
-# Load data frame with presidential election manifestos
-load('data/pres_df.Rda')
-
 # Corpus Presidential Speeches
 corp_pres <- corpus(pres_df, docid_field = 'party', 
                    text_field = 'text')
@@ -375,11 +391,11 @@ dfmat_pres <- dfm_select(dfmat_pres, min_nchar = 2)
 ```
 
 
-#### 2018's Presidential Election 
+#### NAME only in pres election
 
-The graph illustrates the party positions derived from the Presidential manifestos (Y-axis) and the Senate speeches (X-axis) using `wordfish` prediction. 
+The graph illustrates party positions derived from the Presidential manifestos (Y-axis) and the Senate speeches (X-axis) using `wordfish` prediction. 
 
-It is possible to see a pattern where parties are mostly allocated to the right when using Senate speeches. Although, when analyzing Presidential manifestos, parties are mostly allocated to the left. There is one exception of PDT, which is around the center spectrum on Presidential corpus, and on the extreme left for the Senate corpus. 
+It is possible to see a pattern where parties are mostly allocated to the right when using Senate speeches. Although, when analyzing Presidential manifestos, parties are mostly located to the left. There is one exception of PDT, which is around the center spectrum on Presidential corpus, and on the extreme left for the Senate corpus. 
 
 ```{r message=FALSE, warning=FALSE}
 # Austin
@@ -425,7 +441,7 @@ theta_ps %>%
 ```
 
 
-#### All Senate Parties
+#### NAME all parties in senate
 
 The graph shows the party positions derived from the Presidential manifestos (Y-axis) using `austin` prediction and the Senate speeches (X-axis) using `wordfish` prediction. 
 
@@ -451,15 +467,13 @@ merge(theta_sen_wf, theta_sen_au, by = 'party') %>%
 
 # Themes
 
-Having assessed how the parties in senate are positioned in the RILE Scale, let's check how the discussions on the three topics of Bolsonaro's agenda appear in the Senate House. 
+Having assessed how the parties in the senate are positioned in the RILE Scale, let's check how the discussions on the three topics of Bolsonaro's agenda appear in the Senate House. 
 
-For this section, we employed a dictionary analysis, identifying a few words with each topic in order to classify the corpus accordingly.
+For this section, we employed a dictionary analysis, identifying a few words with each topic to classify the corpus accordingly.
 
-We initially consulted the  “LexiCoder Policy Agenda” dictionary to have a baseline for words that could capture these main topics. We then translated the words to Portuguese and adapted them for the Brazilian context. 
+We initially consulted the  “LexiCoder Policy Agenda” dictionary to have a baseline for words that could capture these main topics. We then translated the words into Portuguese and adapted them for the Brazilian context. 
 
-In the following sections, we will analyze the three aforementioned dimensions under the topics Economy, Security and Gender & Family. 
-
-## Dictionary 
+In the following sections, we will analyze the three aforementioned dimensions under the topics Economy, Security, and Gender & Family. 
 
 ```{r}
 # Create Dictionary with themes of interest
@@ -473,8 +487,6 @@ theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>%
 
 
 ## Economy {.tabset}
-
-### Data
 
 To extract documents that discuss economic topics, we filtered documents that have higher scores on the economy dictionary when compared to the security and gender & family dictionaries. 
 
@@ -502,7 +514,7 @@ dfmat_econ <- dfm_select(dfmat_econ, min_nchar = 2)
 
 ### Scaling
 
-Comparing the economy graph for Wordfish with the main graph, we do not see much difference in party positions. This might suggest that discussions on Economy are the main driver behind the allocation of parties in the RILE spectrum. In other words, views on economic matters could bear a high weight in the definition of where a party is positioned in the ideological spectrum. This suggests that economic discussions are more salient in the corpus. 
+Comparing the economy graph for Wordfish with the main graph, we do not see much difference in party positions. This might suggest that discussions on the Economy are the main driver behind the allocation of parties in the RILE spectrum. In other words, views on economic matters could bear a high weight in the definition of where a party is positioned in the ideological spectrum. This suggests that economic discussions are more salient in the corpus. 
 
 ```{r}
 # Wordfish for economy DFM
@@ -516,13 +528,13 @@ gridExtra::grid.arrange(textplot_scale1d(wf_econ), textplot_scale1d(wf), ncol = 
 
 ### RILE Features
 
-The graph displays words that push a document farthest to the left or the right. Words located in the bottom are used less frequently. Right and left word positions (beta) range from approximately -2.5 to 2. 
+The graph displays words that push a document farthest to the left or the right. Words located at the bottom are used less frequently. Right and left word positions (beta) range from approximately -2.5 to 2. 
 
 The words that most contributed for a left-leaning document are *petrobrás (an oil extracting public company whose privatization is a contentious topic), anticapitalista ('anticapitalist'), cut ('centralized labour union'),  auxílio-doença ('illness aid',an employment benefit), sindicalista* ('unionist') and *terceirização* ('outsourcing'). 
 
 For the right, the words are *militarismo ('militarism'), agroindustriais ('agribusiness'), grevista ('striker'), veterinária ('veterinarian'), logística* ('logistics') and *transportes* ('transport'). 
 
-In general, the right discusses business, agriculture and themes related to a somewhat liberal agenda (with words like entrepreneurship, liberalism, and infrastructure). The left discusses pension benefits, worker's rights, and trade unionism. 
+In general, the right discusses business, agriculture, and themes related to a somewhat liberal agenda (with words like entrepreneurship, liberalism, and infrastructure). The left discusses pension benefits, worker's rights, and trade unionism. 
 
 Both sides talk about macroeconomic policies, with words like inflation, GDP, debt, and spending.
 
@@ -559,8 +571,6 @@ ggplot(scores_econ, aes(beta, psi, label = word)) +
 
 ## Security {.tabset}
 
-### Data 
-
 To extract documents that discuss security topics, we filtered documents that have higher scores on the security dictionary when compared to the economy and gender & family dictionaries.
 
 ```{r Security_analysis}
@@ -587,7 +597,7 @@ dfmat_sec <- dfm_select(dfmat_sec, min_nchar = 2)
 
 ### Scaling
 
-Comparing the security graph for Wordfish with the main graph, we see a lot of change in party positions. This may suggest that security bears a smaller weight into defining general parties positions, and/or there is a lot of overlap in the security vocabulary used by senators across the spectrum.
+see a lot of change in party positions. This may suggest that security bears a smaller weight into defining general parties' positions, and/or there is a lot of overlap in the security vocabulary used by senators across the spectrum.
 
 ```{r}
 # Wordfish for security DFM
@@ -600,15 +610,15 @@ gridExtra::grid.arrange(textplot_scale1d(wf_sec), textplot_scale1d(wf), ncol = 2
 
 ### RILE Features
 
-The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -1.5 to 1.5.
+The graph displays words that push a document farthest to the left or the right. Words located at the bottom are used less frequently. Right and left word positions range from approximately -1.5 to 1.5.
 
 The words that most contributed for a left-leaning document are defensoria ('public attorney office'), defensores ('public attorneys'), direitos ('rights'), humanos ('human'), perseguição ('harassment'), liberdade ('freedom') . For the right, the words are vagabundo(s) ('tramps'), juvenis ('juvenile'), tropa ('troop'), pcc (the largest gang in SP), farda ('police suit').
 
-In general, the right discusses crime, criminals and law enforcement activities, while the left discusses human rights and judicial harassment.
+In general, the right discusses crime, criminals, and law enforcement activities, while the left discusses human rights and judicial harassment.
 
-Interestingly, the use of cadeia ('jail') and prisão ('prison'), which are synonyms in Portuguese, seem associated with speeches in different sides of the RILE spectrum. Similarly, the word vagabundagem (idleness that characterizes a tramp) and vagabundo (s) ('tramp') are also associated with different sides of RILE.
+Interestingly, the use of cadeia ('jail') and prisão ('prison'), which are synonyms in Portuguese, seems associated with speeches on different sides of the RILE spectrum. Similarly, the word vagabundagem (idleness that characterizes a tramp) and vagabundo (s) ('tramp') are also associated with different sides of RILE.
 
-Finally, 'feminicídio' (a relatively new criminal offense for an aggravated homicide committed against a woman by her former romantic partner), which is a differentiation to standard homicide typically criticized by right wing politicians with a conservative view of gender issues, is the word that appears most strongly associated with a right-leaning political view.
+Finally, 'feminicídio' (a relatively new criminal offense for an aggravated homicide committed against a woman by her former romantic partner), which is a differentiation to standard homicide typically criticized by right-wing politicians with a conservative view of gender issues, is the word that appears most strongly associated with a right-leaning political view.
 
 ```{r}
 # Features usage left/right
@@ -638,8 +648,6 @@ ggplot(scores_sec, aes(beta, psi, label = word)) +
 
 ## Gender & Family {.tabset}
 
-### Data 
-
 To extract documents that discuss Gender and Family topics, we filter documents that have higher scores on the genfam dictionary when compared to the economy and security dictionaries. 
 
 ```{r}
@@ -666,7 +674,7 @@ dfmat_genfam <- dfm_trim(dfmat_genfam, min_termfreq = 2, min_docfreq = 2)
 
 ### Scaling
 
-Comparing the gender and family graph for Wordfish with the main graph, we see some change in party positions. The party PT is considered extreme left on the main DFM, while left on the genfam DFM. Topics included in gender and family might not be one of the main drivers behind the allocation of parties in the RILE spectrum. Furthermore, this suggests that genfam bears a smaller weight into defining general parties positions, and/or there is a lot of overlap in the genfam vocabulary used by senators across the spectrum.
+Comparing the gender and family graph for Wordfish with the main graph, we see some change in party positions. The party PT is considered extreme left on the main DFM, while left on the genfam DFM. Topics included in gender and family might not be one of the main drivers behind the allocation of parties in the RILE spectrum. Furthermore, this suggests that genfam bears a smaller weight into defining general parties' positions, and/or there is a lot of overlap in the genfam vocabulary used by senators across the spectrum.
 
 ```{r}
 # Wordfish for gender and family DFM
@@ -679,9 +687,9 @@ gridExtra::grid.arrange(textplot_scale1d(wf_genfam), textplot_scale1d(wf), ncol 
 
 ### RILE Features
 
-The graph displays words that push a document farthest to the left or to the right. Words located in the bottom are used less frequently. Right and left word positions range from approximately -0.5 to 0.5.
+The graph displays words that push a document farthest to the left or the right. Words located at the bottom are used less frequently. Right and left word positions range from approximately -0.5 to 0.5.
 
-The word that most contributes for a left-leaning document is resistência ('resistance'). The words that most contribute to a right-leaning document are tradicional ('traditional') and esposa ('wife'). All the other words are really close to the center. 
+The word that most contributes to a left-leaning document is resistência ('resistance'). The words that most contribute to a right-leaning document are tradicional ('traditional') and esposa ('wife'). All the other words are close to the center. 
 
 Finally, words that we expected to be highly significant don't even appear in speeches. Some examples are sexista ('sexist') and 'gay'.
 
@@ -718,4 +726,4 @@ From the analyses made in this project, we understand that it is not all the vie
 
 The themes and famous phrases mentioned by the current President, which are mostly propagated by the Media, are not present in the same intensity in the Senate environment. On the other hand, this might be related to the percentage of representation of each party in the Senate. Take PT as an example; it is one of the main opposition parties to Bolsonaro and has a large Senate representation. Thus, most of their speeches are against what is defended by the President. 
 
-When analyzing the three main themes highlighted in Bolsonaro’s campaign, the economy is the most present in the Senate. In comparison, security, gender, and family appear less frequently, respectively.
+When analyzing the three main themes highlighted in Bolsonaro’s campaign, the economy is the most present in the Senate. In comparison, security and gender & family appear less frequently, respectively.
