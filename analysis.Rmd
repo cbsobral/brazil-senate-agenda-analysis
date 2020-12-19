@@ -1,6 +1,6 @@
 ---
-title: "NAME TADA Final Report"
-subtitle: "NAME"
+title: "Brazilian Senate Parties and Bolsonaro's political agenda (2019-2020)"
+subtitle: "TADA Final Project Report"
 author: Ana Benevides, Carol Sobral, Stefania Molina
 date: "`r Sys.Date()`" 
 output: 
@@ -52,12 +52,12 @@ In this project, we analyzed the corpus of Senators’ speeches from the years 2
 
 # Data
 
-**WRITE: Describe data sets.**
+Let's start by briefly describing the data we will use in our analysis. If you are are curious to know the preliminary steps we took to assemble this information, please find our initial codes in the [Github](https://github.com/cbsobral/tada/tree/main/initial) page for this project. The two data frames containing Senate information were downloaded through [Brazilian Senate API](https://www12.senado.leg.br/dados-abertos).
 
-- `sen_df: 
-- `speech_df:
-- `cemf_2019:
-- `pres_df:
+- `sen_df: a data frame containing information on Senators (name, gender, term in office, party affiliation,State, etc.).
+- `speech_df: a data frame containing all speeches from Brazilian Senators for the period of 2019-2019.
+- `cemf_2019: a data frame containing a Brazilian press assessment of parties' positions
+- `pres_df: a data frame containing all manifestos from Brazilian Presidentian Election of 2018.
 
 ```{r Data_corpus_DFM}
 # Senators data frame
@@ -152,8 +152,9 @@ party_speech <- speech_df %>%
 
 gridExtra::grid.arrange(party_sen, party_speech)
 ```
+In the graph below, the parties represented in blue have spoken more than their expected average, considering the number of Senators they hold. Parties represented in red have spoken less than their expected average. This finding suggests that parties from the left, noticeably, PT and REDE, speak more than their pairs.
 
-What we find out is that PT, with only 6 Senators (8% of the Senate House) has 1097 speeches (21% of the speeches). PT was the runner-off party of the 2018 elections and was the party elected for the presidential elections of 2002, 2006, 2010, and 2014. This finding might indicate a higher opposition to Bolsonaro's agenda within the Senate corpus.
+This might lead to a higher opposition to Bolsonaro's agenda within the Senate corpus.
 
 ```{r Prop_Speeches_Party, message=FALSE, warning=FALSE}
 # Number of speeches
@@ -179,13 +180,20 @@ merge(n_speeches, n_senators, by = 'Partido') %>%
   geom_col() +
   geom_text(aes(y = diff + 2 * sign(diff), label = diff), 
             position = position_dodge(width = 0.9)) +
-  ylab('XXXXXXX') +
+  ylab('Percentage difference to expected Speeches') +
   xlab('Party') +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 90), legend.position = 'none') 
 ```
 
-**WRITE**
+One final thing needs to be mentioned about Brazilian Politics current state of affairs. In recent years, politicians in Brazil have often changed parties. This happens mostly out of ideological differences and conflicts with Party leadership. In fact, Bolsonaro has been party-less ("S/ Partido") for over a year.
+
+The lack of party loyalty and identification that is currently a trend in Brazilian Political context might render any study that attempts to draw an inference about party position from politicians' speeches susceptible to criticism. Katia Abreu, for instance, has been associated with 3 different Parties in the period of 2019-2020, and has also been party-less for a while. In order to assess the degree to which this study is vulnerable to this criticism, we listed bellow the changes in party affiliation that affect our corpus.
+
+Overall, 17 senators (23%) have changed party affiliation at least once in the period of analysis.
+
+These shifts in affiliation explain why 'speech_df' contains 22 parties, as it lists senators' parties according to affiliation at the time of the speech. Sen_df only contains 16 parties, as it displays senators' affiliations as they stand today. 
+
 
 ```{r}
 # Party Changes
@@ -207,6 +215,8 @@ final_change <- change %>%
 
 # Print
 final_change
+
+
 ```
 
 
@@ -247,7 +257,7 @@ gridExtra::grid.arrange(state_sen, state_speech)
 
 First, we use Wordfish as the text scaling method for the Senate speeches. After, as shown below, we plot the results of a fitted scaling model. 
 
-**WRITE: descrição do gráfico.**
+The plot shows PL as the party farthest to the right and PT as the one farthest to the left.
 
 ```{r RILE_speaches}
 # Main Senate Corpus 
@@ -278,9 +288,9 @@ textplot_scale1d(wf)
 To better understand the Senate speeches position generated with Wordfish, we compare it with media perception of each party. 
 
 
-#### NAME Main Graph 
+#### Wordfish vs Media assessment 
 
-The graph below shows the *Congresso em Foco* (y-axis) and the Wordfish categorization (x-axis) for each party. 
+The graph below shows the *Congresso em Foco* - a press assessment (y-axis) and the Wordfish categorization (x-axis) for each party. 
 
 Some parties appear as similar positions in both situations, such as PSB, PSDB, and MDB. On the other hand, the Wordfish model considers PT on the extreme left, around -2 on the scale. In contrast, the Media considers the same party on the left, around -1 on the scale.
 
@@ -314,9 +324,9 @@ scores %>%
   theme(legend.position = 'none') 
 ```
 
-#### NAME Ana
+#### Weighted by Number of Senators
 
-**WRITE**
+This graph displays parties' positions (Wordfish x Media), with circle sizes representing the weight of the party in the Senate House in terms of number of Senators. This represents parties' relative importance in approving laws, as number of senators directly affect number of votes.
 
 ```{r message=FALSE, warning=FALSE}
 # Media and number of senators
@@ -340,9 +350,9 @@ sen_df %>%
   theme(legend.position = 'none') 
 ```
 
-#### NAME Ana
+#### Weighted by Number of Speeches
 
-**WRITE**
+The same graph displays parties positions (Wordfish x Media), with circle sizes representing the weight of the party in the Senate House in terms of number of Speeches. This represents parties' relative importance in affecting our corpus composition. Assuming senators can change their mind by listening to their peers, this could also be a measure of their influence reach.
 
 ```{r message=FALSE, warning=FALSE}
 # Media and number of speeches
@@ -440,7 +450,7 @@ theta_ps %>%
 ```
 
 
-#### NAME all parties in senate
+#### Austin Prediction vs. Wordfish
 
 The graph shows the party positions derived from the Presidential manifestos (Y-axis) using `austin` prediction and the Senate speeches (X-axis) using `wordfish` prediction. 
 
@@ -596,7 +606,7 @@ dfmat_sec <- dfm_select(dfmat_sec, min_nchar = 2)
 
 ### Scaling
 
-see a lot of change in party positions. This may suggest that security bears a smaller weight into defining general parties' positions, and/or there is a lot of overlap in the security vocabulary used by senators across the spectrum.
+Comparing the security graph for Wordfish with the main graph, we see a lot of change in party positions. This may suggest that security bears a smaller weight into defining general parties' positions, and/or that there is a lot of overlap in the security vocabulary used by senators across the spectrum.
 
 ```{r}
 # Wordfish for security DFM
@@ -609,9 +619,9 @@ gridExtra::grid.arrange(textplot_scale1d(wf_sec), textplot_scale1d(wf), ncol = 2
 
 ### RILE Features
 
-The graph displays words that push a document farthest to the left or the right. Words located at the bottom are used less frequently. Right and left word positions range from approximately -1.5 to 1.5.
+The graph displays words that push a document farthest to the left or the right. Words located at the bottom are used less frequently. Right and left word positions range from approximately -1.5 to 2.0.
 
-The words that most contributed for a left-leaning document are defensoria ('public attorney office'), defensores ('public attorneys'), direitos ('rights'), humanos ('human'), perseguição ('harassment'), liberdade ('freedom') . For the right, the words are vagabundo(s) ('tramps'), juvenis ('juvenile'), tropa ('troop'), pcc (the largest gang in SP), farda ('police suit').
+The words that most contributed for a left-leaning document are defensoria ('public attorney office'), defensores (either 'public attorneys', or 'defenders'), direitos ('rights'), humanos ('human'), perseguição ('harassment'), liberdade ('freedom') . For the right, the words are vagabundo(s) ('tramps'), juvenis ('juvenile'), tropa (‘troop’), pcc (the largest gang in SP) and feminicídio ('feminicide').
 
 In general, the right discusses crime, criminals, and law enforcement activities, while the left discusses human rights and judicial harassment.
 
@@ -630,7 +640,7 @@ feat_sec <- data.frame(
 # Select words for graph
 words_sec <- c('bandidagem','direitos', 'humanos','juiz','perseguição', 'liberdade', 
                'defesa','violência','cadeia', 'prisão', 'vagabundo', 'vagabundos', 'vagabundagem', 
-               'juvenis','arma', 'tiro', 'feminicídio', 'fiança','militar')
+               'juvenis','arma', 'tiro', 'defensoria', 'defensores','pcc', 'tropa','feminicídio', 'fiança','militar')
               
 # Extract scores
 scores_sec <- arrange(filter(feat_sec, word %in% words_sec), beta)
@@ -721,8 +731,14 @@ ggplot(scores_genfam, aes(beta, psi, label = word)) +
 
 # Conclusion 
 
-From the analyses made in this project, we understand that it is not all the views present in the populist discourse of President Jair Bolsonaro that are also present in the speeches of the Brazilian Senate.
+From our analysis, we infer that not all themes present in Bolsonaro's discourse have the same relevance in the speeches of the Brazilian Senate.
 
-The themes and famous phrases mentioned by the current President, which are mostly propagated by the Media, are not present in the same intensity in the Senate environment. On the other hand, this might be related to the percentage of representation of each party in the Senate. Take PT as an example; it is one of the main opposition parties to Bolsonaro and has a large Senate representation. Thus, most of their speeches are against what is defended by the President. 
+Economy bears a higher importance in the discussions in the Senate House, and better reflects the partisan division between those on the left that advocate for a heterodox approach, with State driving investment, and those on the right, that tend to favour an orthodox approach, advocating for liberal policies. Security and Gender & Family seem less salient in the discussions of the Senate, and there seems to be a bigger overlap in the use of vocabulary by parties from different parts of the spectrum.
 
-When analyzing the three main themes highlighted in Bolsonaro’s campaign, the economy is the most present in the Senate. In comparison, security and gender & family appear less frequently, respectively.
+While Bolsonaro's agenda is certainly contentious in Brazilian society, making for daily headlines in Brazilian press, the Senate House doesn't seem to give the same weight to discussing his proposals for Security and Gender & Family as we would have expected just from reading the newspapers. 
+
+On the other hand, a prevalence of speeches from the opposition may explain, at least in part, the lack of resonance of Bolsonaro's project in the Senate. Take PT as an example; it is one of the main opposition parties to Bolsonaro and has a large participation in overall Senate speeches.  
+
+# Note on Contributions
+We cooperated both in code development and in analysis, and contributed to discussing which analysis we should apply (and which we should drop) as a group. Carol handled the economy analysis, Ana the security analysis and Stefania the Gender & Family analysis. 
+
