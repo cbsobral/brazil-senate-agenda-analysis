@@ -1,8 +1,7 @@
 ---
 title: "NAME TADA Final Report"
 subtitle: "NAME"
-author: 
-  - name: Ana Benevides, Carol Sobral, Stefania Molina
+author: Ana Benevides, Carol Sobral, Stefania Molina
 date: "`r Sys.Date()`" 
 output: 
   html_document:
