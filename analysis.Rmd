@@ -449,7 +449,7 @@ theta_ps %>%
 
 #### Austin vs. Wordfish
 
-The graph shows party positions derived for Senate speeches. The y-axis contains values from `austin` out-of-sample prediction from presidential manifestos and the x-axis contains `wordfish` values. We see that `austin` predictions are more centered, while `wordfish` are more polarized. 
+The graph shows party positions derived from Senate speeches. The y-axis contains values from Austin's out-of-sample prediction from presidential manifestos and the x-axis contains Wordfish values. We see that `austin` predictions are more centered, while `wordfish` are more polarized. 
 
 ```{r}
 # Compare wf_sen x out of sample Austin prediction to senate speeches
