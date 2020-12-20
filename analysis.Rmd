@@ -75,7 +75,6 @@ load('data/cemf_2019.Rda')
 load('data/pres_df.Rda')
 ```
 
-
 # Senate 
 
 ## General Characteristics {.tabset}
@@ -86,7 +85,7 @@ The Senate API only displays current senators' speeches, which is why Roraima on
 
 In what concerns gender, although females are the majority of the Brazilian population (97 males per 100 females)^[https://cnae.ibge.gov.br/en/component/content/article/95-7a12/7a12-vamos-conhecer-o-brasil/nosso-povo/16048-numero-de-homens-e-mulheres.html], women represent only 1/8 of the composition of the Senate House. 18 states have only male senators (including Roraima, with only 2 senators); 8 states have 2 male senators and 1 female senator and 1 state has 2 female senators and 1 male senator (Mato Grosso do Sul - MS)
 
-In terms of party distribution, 16 parties have at least one senator in the present term. MDB, PSD, and PODEMOS are the parties with the largest representation, holding 13, 12, and 10 senators, respectively. All of PSD senators are male, while PSD and PODEMOS have 1 female senator each. 
+In terms of party distribution, 16 parties have at least one senator in the present term. MDB, PSD, and PODEMOS are the parties with the largest representation, holding 13, 12, and 10 senators, respectively. All of PSD senators are male, while MDB and PODEMOS have 1 female senator each. 
 
 Looking into the distribution of gender per party, 9 of these parties have at least one female senator; but only 1 party (PP) has 2 female senators.
 
