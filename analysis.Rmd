@@ -4,7 +4,9 @@ subtitle: "TADA Final Project Report"
 author: Ana Benevides, Carol Sobral, Stefania Molina
 date: "`r Sys.Date()`" 
 abstract: |
-  XXXXXXXXXXXXX
+  In this study, we examine the collection of speeches made in the Brazilian Senate in the period of 2019-2020 to assess how three dimensions of Bolsonaro’s political agenda resonate within the discussions being held in the Senate House. We start by exploring the composition of the Brazilian Senate, and we find that speech distribution is not evenly balanced, but disproportionally represent male speeches, and coming from a few states and with a predominance of parties from the left. 
+  Turning to scaling, we compare party ideologies in the Right-Left scale based on Senate’s speeches with an assessment made by the Brazilian press. Then we compare party positions using the manifestos from the 2018 presidential elections.
+  Finally, in assessing the three dimensions of Bolsonaro’s agenda, we conclude that economic discussions seem more polarized, with a distinct preference for certain words and topics, depending on RILE position. Discussions based on security and gender & family are less prevalent in the corpus, and do not suggest a strong differentiation in the vocabulary employed.
 output: 
   html_document:
     code_folding: hide 
@@ -33,9 +35,9 @@ library(austin)
 # Introduction
 <style> body {text-align: justify} </style>
 
-With the support of a Party coalition named “Brazil above everything, God above everyone”, Bolsonaro was elected, in 2018, president of Brazil for the 2019-2022 term. Having served as congress representative (“deputado federal”) for the State of Rio de Janeiro since 1991, Bolsonaro reached notoriety for his populist and often sexist, homophobic, anti-human rights, anti-democratic political views.
+With the support of a Party coalition named “Brazil above everything, God above everyone”, Bolsonaro was elected, in 2018, president of Brazil for the 2019-2022 term. Having served as congress representative (“deputado federal”) for the State of Rio de Janeiro since 1991, Bolsonaro reached notoriety for his populist and often sexist, homophobic, anti-human rights, and anti-democratic political views.
 
-After 4 consecutive elections of a left party (“Labour Party”, i.e. “Partido do Trabalhadores” – PT) for the presidency of Brazil, and in the aftermath of a controversial conviction of its most prominent leader -- and front runner in the election polls --  on corruption charges^[https://www.tse.jus.br/imprensa/noticias-tse/2018/Setembro/tse-indefere-pedido-de-registro-de-candidatura-de-lula-a-presidencia-da-republica], Bolsonaro benefited from a rise in anti-left sentiment and took the leadership of the poll of candidates with a manifesto that was filled with religious/Christian language and that was based on three pillars, that were directly opposed to the agenda of left/progressive groups:
+After 4 consecutive elections of a left party (“Labour Party”, i.e. “Partido do Trabalhadores” – PT) for the presidency of Brazil, and in the aftermath of a controversial conviction of its most prominent leader -- and front runner in the election polls --  on corruption charges^[https://www.tse.jus.br/imprensa/noticias-tse/2018/Setembro/tse-indefere-pedido-de-registro-de-candidatura-de-lula-a-presidencia-da-republica], Bolsonaro benefited from a rise in anti-left sentiment and took the leadership of the poll with a manifesto that was filled with religious/Christian language and that was based on three pillars, that were directly opposed to the agenda of left/progressive groups:
 	
 1. Liberalization of economic policy: promising deregulation, privatization, and extinction of sectors of the public service;
 	
@@ -43,22 +45,22 @@ After 4 consecutive elections of a left party (“Labour Party”, i.e. “Parti
 	
 3. Conservative moral agenda: opposition of sex education in schools; opposition to policies that aim at extending equality of rights for LGBT people; opposition to pregnancy termination, even in the limited circumstances allowed in Brazilian Law (rape; health risk for the woman; anencephaly of the fetus); reinforcement of gender stereotypical roles.    
 	
-For this project, we are interested in assessing if, and to what extent, these three axes that constitute Bolsonaro’s political agenda are also resonating in the Brazilian Senate.
+For this project, we assess if, and to what extent, these three axes that constitute Bolsonaro’s political agenda are also resonating in the Brazilian Senate.
 	
-Brazil’s Senate House is composed of 3 senators per state and the Federal District, totaling 81 senators. Each term in office last for 8 years,  but the election cycle happens every 4 years, alternating the elections for 2/3 and 1/3 of the house.  Theoretically speaking, the alternate election cycle should render the Senate House less sensitive to momentary waves that, if salient in a given moment, could heavily influence the course of a presidential election. 
+Brazil’s Senate House is composed of 3 senators per state and the Federal District, totaling 81 senators. Each term in office lasts for 8 years, but the election cycle happens every 4 years, alternating the elections for 2/3 and 1/3 of the house.  Theoretically speaking, the alternate election cycle should render the Senate House less sensitive to momentary waves that, if salient in a given moment, could heavily influence the course of a presidential election. 
 	
 In 2018, 2/3 of the Senate chairs were elected (54 senators), while the remaining 1/3 had still half the term in office to complete. 
 	
-In this project, we analyzed the corpus of senators’ speeches from the years 2019-2020, focusing on issues associated with these salient dimensions of Bolsonaro’s political plan.
+In this project, we analyzed the corpus of senators’ speeches from 2019-2020, focusing on issues associated with these salient dimensions of Bolsonaro’s political plan.
 
 
 # Data
 
-Let's start by briefly describing the data we will use in our analysis. If you are interested in knowing the preliminary steps we took to assemble this information, please find our initial codes in the [GitHub](https://github.com/cbsobral/tada/tree/main/initial) page for this project. The two data frames containing Senate information were downloaded through the [Brazilian Senate API](https://www12.senado.leg.br/dados-abertos).
+Let's start by briefly describing the data we will use in our analysis. The preliminary steps we took to assemble this information, can in found in our initial codes on the [GitHub](https://github.com/cbsobral/tada/tree/main/initial) page for this project. The two data frames containing Senate information were downloaded through the [Brazilian Senate API](https://www12.senado.leg.br/dados-abertos).
 
 - `sen_df`: a data frame containing information on senators (name, gender, term in office, party affiliation, state, etc.).
 - `speech_df`: a data frame containing all speeches from Brazilian senators for the period of 2019-2020.
-- `cemf_2019`: a data frame containing a Brazilian press assessment of parties' positions from 2019 (*Congresso em Foco*).^[https://pt.wikipedia.org/wiki/Lista_de_partidos_pol%C3%ADticos_do_Brasil]
+- `cemf_2019`: a data frame containing a Brazilian press assessment of parties' positions in 2019.^[https://pt.wikipedia.org/wiki/Lista_de_partidos_pol%C3%ADticos_do_Brasil]
 - `pres_df`: a data frame containing all manifestos from Brazil's Presidential Election of 2018.
 
 ```{r Data_corpus_DFM}
@@ -85,9 +87,7 @@ The Senate API only displays current senators' speeches, which is why Roraima on
 
 In what concerns gender, although females are the majority of the Brazilian population (97 males per 100 females)^[https://cnae.ibge.gov.br/en/component/content/article/95-7a12/7a12-vamos-conhecer-o-brasil/nosso-povo/16048-numero-de-homens-e-mulheres.html], women represent only 1/8 of the composition of the Senate House. 18 states have only male senators (including Roraima, with only 2 senators); 8 states have 2 male senators and 1 female senator and 1 state has 2 female senators and 1 male senator (Mato Grosso do Sul - MS)
 
-In terms of party distribution, 16 parties have at least one senator in the present term. MDB, PSD, and PODEMOS are the parties with the largest representation, holding 13, 12, and 10 senators, respectively. All of PSD senators are male, while MDB and PODEMOS have 1 female senator each. 
-
-Looking into the distribution of gender per party, 9 of these parties have at least one female senator; but only 1 party (PP) has 2 female senators.
+In terms of party distribution, 16 parties have at least one senator in the present term. MDB, PSD, and PODEMOS are the parties with the largest representation, holding 13, 12, and 10 senators, respectively. All of PSD senators are male, while MDB and PODEMOS have 1 female senator each. Looking into the distribution of gender per party, 9 of these parties have at least one female senator; but only 1 party (PP) has 2 female senators.
 
 Considering these characteristics of the Senate House, let's see if the speech distribution follows the same pattern, i.e., let's check if females' are responsible for 1/8 of the total speeches, and how speeches are distributed among these 16 parties, and among the 27 states.
 
@@ -154,9 +154,7 @@ party_speech <- speech_df %>%
 gridExtra::grid.arrange(party_sen, party_speech)
 ```
 
-In the graph below, the parties represented in blue have spoken more than their expected average, considering the number of senators they hold. Parties represented in red have spoken less than their expected average. This finding suggests that parties from the left, noticeably, PT and REDE, speak more than their peers.
-
-This might lead to a higher opposition to Bolsonaro's agenda within the Senate.
+In the graph below, parties represented in blue have spoken more than their expected average, considering their number of senators. Parties represented in red have spoken less than their expected average. This finding suggests that parties from the left, noticeably, PT and REDE, speak more than their peers. This might lead to a higher opposition to Bolsonaro's agenda within the Senate.
 
 ```{r Prop_Speeches_Party, message=FALSE, warning=FALSE}
 # Number of speeches
@@ -189,12 +187,9 @@ merge(n_speeches, n_senators, by = 'Partido') %>%
 
 One final thing needs to be mentioned about Brazilian politics current state of affairs. In recent years, politicians in Brazil have often changed parties. This happens mostly out of ideological differences and conflicts with party leadership. In fact, Bolsonaro has been partyless ("S/ Partido") for over a year.
 
-The lack of party loyalty and identification that is currently a trend in Brazilian political context might render any study that attempts to draw an inference about party position from politicians' speeches susceptible to criticism. Katia Abreu, for instance, has been associated with 3 different parties in the period of 2019-2020, and has also been partyless for a while. In order to assess the degree to which this study is vulnerable to this criticism, we listed bellow the changes in party affiliation that affect our corpus.
+The lack of party loyalty and identification that is currently a trend in the Brazilian political context might render any study that attempts to draw an inference about party positions from politicians' speeches susceptible to criticism. Katia Abreu, for instance, has been associated with 3 different parties in the period of 2019-2020, and has also been partyless for a while. In order to assess the degree to which this study is vulnerable to this criticism, we listed bellow the changes in party affiliation that affect our corpus.
 
-Overall, 17 senators (23%) have changed party affiliation at least once in the period of analysis.
-
-These shifts in affiliation explain why `speech_df` contains 22 parties, as it lists senators' parties according to affiliation at the time of the speech. `sen_df` only contains 16 parties, as it displays senators' affiliations as they stand today. 
-
+Overall, 17 senators (23%) have changed party affiliation at least once in the period of analysis. These shifts in affiliation explain why `speech_df` contains 22 parties, as it lists senators' parties according to affiliation at the time of the speech. `sen_df` only contains 16 parties, as it displays senators' affiliations as they stand today. 
 
 ```{r}
 # Party Changes
@@ -221,9 +216,7 @@ final_change
 
 ### States
 
-Our data set is composed of 5188 speeches given by 80 senators from 27 states. Assuming each senator uses speech opportunities equally, we would expect that each state to have around 192 speeches. Let's see if this checks out.
-
-What we see is that senators coming from some states, such as RS, PE, DF, and AP far exceed the expected average of speeches; at the same time, senators from PB, AC, and RJ seem not to have spoken as much as their peers in 2019 and 2020. 
+Our data set is composed of 5188 speeches given by 80 senators from 27 states. Assuming each senator uses speaking opportunities equally, we would expect each state to have around 192 speeches. What we see is that senators coming from some states, such as RS, PE, DF, and AP far exceed the expected average of speeches; at the same time, senators from PB, AC, and RJ seem not to have spoken as much as their peers in 2019 and 2020. 
 
 This might indicate that the items relevant for the agenda of the states that have more speeches might bear higher weight in the corpus.
 
@@ -255,7 +248,7 @@ gridExtra::grid.arrange(state_sen, state_speech)
 
 ## Speeches Scaling 
 
-First, we use Wordfish as the text scaling method for the Senate speeches. After, as shown below, we plot the results of a fitted scaling model. eThe plot shows PL as the party farthest to the right and PT as the one farthest to the left.
+First, we use *Wordfish* as the text scaling method for the Senate speeches. After, as shown below, we plot the results of a fitted scaling model. The plot shows PL as the party farthest to the right and PT as the one farthest to the left.
 
 ```{r RILE_speaches}
 # Main Senate Corpus 
@@ -283,15 +276,15 @@ textplot_scale1d(wf)
 
 ### Wordfish Scores X Media {.tabset}
 
-To better understand the Senate speeches position generated with Wordfish, we compare it with the media perception of each party. 
+To better understand the Senate speeches positions generated with *Wordfish*, we compare them with the media perception of each party. 
 
 #### Wordfish vs Media assessment 
 
-The graph below shows the *Congresso em Foco* - a press assessment (y-axis) and the Wordfish categorization (x-axis) for each party. 
+The graph below shows a press assessment - *Congresso em Foco* - (y-axis) and the *Wordfish* categorization (x-axis) for each party. 
 
-Some parties appear in similar positions in both situations, such as PSB, PSDB, and MDB. On the other hand, the Wordfish model considers PT on the extreme left, around -2 on the scale. In contrast, the media categorization considers the same party on the left, around -1 on the scale.
+Some parties appear in similar positions in both situations, such as PSB, PSDB, and MDB. On the other hand, the *Wordfish* model considers PT to be in the extreme left, around -2 on the scale. In contrast, the media categorization considers the same party in the left, at -1 on the scale.
 
-We see the same pattern on the other side of the scale. While the media considers PSL on the right, the Wordfish model assumes the same party is located in the center.  
+We see the same pattern on the other side of the scale. While the media puts PSL in the right, the *Wordfish* model assumes the same party is located in the center.  
 
 ```{r RILE_media, message=FALSE, warning=FALSE}
 # Code right, left, center positions 
@@ -324,7 +317,7 @@ scores %>%
 
 #### Weighted by Number of Senators
 
-This graph displays parties' positions (Wordfish x Media), with circle sizes representing the weight of the party in the Senate House in terms of number of senators. This represents parties' relative importance in approving laws, as number of senators directly affect number of votes.
+This graph displays parties' positions (*Wordfish* x Media), with circle sizes representing the weight of the party in the Senate House in terms of number of senators. This represents parties' relative importance in approving laws, as number of senators directly affect the number of votes.
 
 ```{r message=FALSE, warning=FALSE}
 # Plot with media position and number of senators
@@ -350,7 +343,7 @@ sen_df %>%
 
 #### Weighted by Number of Speeches
 
-The same graph displays parties positions (Wordfish x Media), with circle sizes representing the weight of the party in the Senate House in terms of number of speeches. This represents parties' relative importance in affecting our corpus composition. Assuming senators can change their mind by listening to their peers, this could also be a measure of their influence reach.
+This graph displays parties positions (*Wordfish* x Media), with circle sizes representing the weight of the party in the Senate in terms of number of speeches. This represents parties' relative importance in affecting our corpus composition. Assuming senators can change their mind by listening to their peers, this could also be a measure of their reach.
 
 ```{r message=FALSE, warning=FALSE}
 # Plot media position and number of speeches
@@ -377,7 +370,7 @@ speech_df %>%
 
 ### 2018's Presidential Manifestos {.tabset}
 
-In this section, we compare Senate speeches positions as predicted by Wordfish with party positions estimated from presidential manifestos from the 2018 election using Austin. 
+In this section, we use Austin to estimate party positions from presidential manifestos for the 2018 election.
 
 ```{r Presidential_Campaign}
 # Corpus presidential speeches
@@ -400,7 +393,7 @@ dfmat_pres <- dfm_select(dfmat_pres, min_nchar = 2)
 
 #### Austin Prediction
 
-The graph illustrates party positions derived with `austin` from the presidential manifestos (y-axis) and positions for Senate speeches (x-axis) derived from an out-of-sample prediction. Parties have more extreme positions based on presidential manifestos. This might suggest that when running presidential elections, parties adopt in their manifestos more clear-cut positions, as they are catering to their preferred constituency. In everyday discussions in the Senate, however, positions seem to be more fluid, and less extreme - something also evidenced by the aforementioned lack of party loyalty/identification coming from at least 23% of the senators.
+The graph illustrates party positions derived with Austin from the presidential manifestos (y-axis) and positions for Senate speeches (x-axis) derived from an out-of-sample prediction. Parties have more extreme positions based on presidential manifestos. This might suggest that when running presidential elections, parties adopt in their manifestos more clear-cut positions, as they are catering to their preferred constituency. In everyday discussions in the Senate, however, positions seem to be more fluid, and less extreme - something also evidenced by the aforementioned lack of party loyalty/identification coming from at least 23% of the senators.
 
 ```{r message=FALSE, warning=FALSE}
 # Austin
@@ -448,7 +441,7 @@ theta_ps %>%
 
 #### Austin vs. Wordfish
 
-The graph shows party positions derived from Senate speeches. The y-axis contains values from Austin's out-of-sample prediction from presidential manifestos and the x-axis contains Wordfish values. We see that `austin` predictions are more centered, while `wordfish` are more polarized. 
+The graph shows party positions derived from Senate speeches. The y-axis contains values from Austin's out-of-sample prediction from presidential manifestos and the x-axis contains *Wordfish* values. We see that *Austin* predictions are more centered, while *Wordfish* are more polarized. 
 
 ```{r}
 # Compare wf_sen x out of sample Austin prediction to senate speeches
@@ -470,13 +463,15 @@ merge(theta_sen_wf, theta_sen_au, by = 'party') %>%
 
 # Themes
 
-Having assessed how the parties in the Senate are positioned in the RILE scale, let's check how the discussions on the three topics of Bolsonaro's agenda appear in the Senate House. 
+Having assessed how the parties in the Senate are positioned in the RILE scale, let's check how the discussions on the three topics of Bolsonaro's agenda appear in the Senate. 
 
 For this section, we employed a dictionary analysis, identifying a few words with each topic to classify the corpus accordingly.
 
 We initially consulted the  “LexiCoder Policy Agenda” dictionary to have a baseline for words that could capture these main topics. We then translated the words into Portuguese and adapted them for the Brazilian context. 
 
 In the following sections, we will analyze the three aforementioned dimensions under the topics Economy, Security, and Gender & Family. 
+
+To extract documents for each topic, we filtered texts that have higher scores in a determined topic when compared to the others. 
 
 ```{r}
 # Create Dictionary with themes of interest
@@ -491,7 +486,6 @@ theme_df  <- dfm(corp_sen, dictionary = theme.lexicon) %>%
 
 ## Economy {.tabset}
 
-To extract documents that discuss economic topics, we filtered texts that have higher scores on the economy dictionary when compared to the security and gender & family dictionaries. 
 
 ```{r}
 # List with documents about economy
@@ -517,7 +511,7 @@ dfmat_econ <- dfm_select(dfmat_econ, min_nchar = 2)
 
 ### Scaling
 
-Comparing the economy graph for Wordfish with the main graph, we do not see much difference in party positions. This might suggest that discussions on the economy are the main driver behind the allocation of parties in the RILE spectrum. In other words, views on economic matters could bear a high weight in the definition of where a party is positioned in the ideological spectrum. This suggests that economic discussions are more salient in the corpus. 
+Comparing the economy graph for *Wordfish* with the main graph, we do not see much difference in party positions. This might suggest that discussions on the economy are the main driver behind the allocation of parties in the RILE spectrum. In other words, views on economic matters could bear a high weight in the definition of where a party is positioned in the ideological spectrum. This suggests that economic discussions are more salient in the corpus. 
 
 ```{r}
 # Wordfish for economy DFM
@@ -574,7 +568,6 @@ ggplot(scores_econ, aes(beta, psi, label = word)) +
 
 ## Security {.tabset}
 
-To extract documents that discuss security topics, we filtered texts that have higher scores on the security dictionary when compared to the economy and gender & family dictionaries.
 
 ```{r Security_analysis}
 # List with documents about security
@@ -600,7 +593,7 @@ dfmat_sec <- dfm_select(dfmat_sec, min_nchar = 2)
 
 ### Scaling
 
-Comparing the security graph for Wordfish with the main graph, we see a lot of change in party positions. This may suggest that security bears a smaller weight into defining general parties' positions, and/or that there is a lot of overlap in the security vocabulary used by senators across the spectrum.
+Comparing the security graph for *Wordfish* with the main graph, we see a lot of change in party positions. This may suggest that security bears a smaller weight into defining general parties' positions, and/or that there is a lot of overlap in the security vocabulary used by senators across the spectrum.
 
 ```{r}
 # Wordfish for security DFM
@@ -651,7 +644,6 @@ ggplot(scores_sec, aes(beta, psi, label = word)) +
 
 ## Gender & Family {.tabset}
 
-To extract documents that discuss Gender and Family topics, we filter texts that have higher scores on the gender & family dictionary when compared to the economy and security dictionaries. 
 
 ```{r}
 # List with documents about gender and family 
@@ -677,7 +669,7 @@ dfmat_genfam <- dfm_trim(dfmat_genfam, min_termfreq = 2, min_docfreq = 2)
 
 ### Scaling
 
-Comparing the gender and family graph for Wordfish with the main graph, we see some change in party positions. The party PT is considered extreme left on the main DFM, while left on the gender & family DFM. Topics included in gender and family might not be one of the main drivers behind the allocation of parties in the RILE spectrum. Furthermore, this suggests that gender & family bears a smaller weight into defining general parties' positions, and/or there is a lot of overlap in the gender & family vocabulary used by senators across the spectrum.
+Comparing the gender and family graph for *Wordfish* with the main graph, we see some change in party positions. PT is considered extreme left in the main DFM, while left in the gender & family DFM. Topics included in gender and family might not be drivers behind the allocation of parties in the RILE spectrum. Furthermore, this suggests that gender & family bears a smaller weight into defining general parties' positions, and/or there is a lot of overlap in the gender & family vocabulary used by senators across the spectrum.
 
 ```{r}
 # Wordfish for gender and family DFM
@@ -727,9 +719,9 @@ ggplot(scores_genfam, aes(beta, psi, label = word)) +
 
 From our analysis, we infer that not all themes present in Bolsonaro's discourse have the same relevance in the speeches of the Brazilian Senate.
 
-Economy bears a higher importance in the discussions in the Senate House, and better reflects the partisan division between those on the left that advocate for a heterodox approach, with state driving investment, and those on the right, that tend to favor an orthodox approach, advocating for liberal policies. Security and Gender & Family seem less salient in the discussions of the Senate, and there seems to be a bigger overlap in the use of vocabulary by parties from different parts of the spectrum.
+Economy bears a higher weight in the discussions in the Senate, and better reflects the partisan division between those on the left that advocate for a heterodox approach, with state driving investment, and those on the right, that tend to favor an orthodox approach, advocating for liberal policies. Security and Gender & Family seem less salient in the discussions of the Senate, and there seems to be a bigger overlap in the use of vocabulary by parties from different sides of the spectrum.
 
-While Bolsonaro's agenda is certainly contentious in Brazilian society, making for daily headlines in Brazilian press, the Senate House doesn't seem to give the same weight to discussing his proposals for Security and Gender & Family as we would have expected just from reading the newspapers. 
+While Bolsonaro's agenda is certainly contentious in Brazilian society, making for daily headlines in the Brazilian press, the Senate doesn't seem to give the same weight to discussing his proposals for Security and Gender & Family as we would have expected just from reading the newspapers. 
 
 On the other hand, a prevalence of speeches from the opposition may explain, at least in part, the lack of resonance of Bolsonaro's project in the Senate. Take PT as an example; it is one of the main opposition parties to Bolsonaro and has a large participation in overall Senate speeches.  
 
