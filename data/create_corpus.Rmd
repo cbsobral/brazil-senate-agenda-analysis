@@ -16,6 +16,7 @@ library(readtext)
 # Senate
 
 Download senators data frame. 
+
 ```{r}
 senators <- sen_senator_list()
 ```
@@ -29,13 +30,13 @@ for(i in 1:80) { try({
   raw_json <- GET(endpoint, add_headers("Accept:application/json"))
   parsed_json <- fromJSON(content(raw_json, "text"), flatten = TRUE)
   str(parsed_json)
-  speeches_df <- parsed_json$DiscursosParlamentar$Parlamentar$Pronunciamentos$Pronunciamento
+  speech_df <- parsed_json$DiscursosParlamentar$Parlamentar$Pronunciamentos$Pronunciamento
   
   url_list <-
-    as.list(as.data.frame(t(speeches_df['UrlTextoBinario'])))
+    as.list(as.data.frame(t(speech_df['UrlTextoBinario'])))
   
   names_list <- 
-    as.list(as.data.frame(t(speeches_df['CodigoPronunciamento'])))  
+    as.list(as.data.frame(t(speech_df['CodigoPronunciamento'])))  
   
   names <- 
     tidyr::expand_grid(names_list) %>%
@@ -91,49 +92,30 @@ pdf_path <- "C:\\Users\\carol\\Desktop\\Fall_2020\\TADA\\Senado\\Web"
 pdfs <- list.files(path = pdf_path, pattern = "*.pdf", full.names = TRUE) 
 
 # Create data frame
-speeches_df <- readtext(pdfs,
+speech_df <- readtext(pdfs,
                         docvarsfrom = "filenames", verbosity = TRUE)
 
 # Rename and select relevant columns
-speeches_df <- speeches_df %>% 
+speech_df <- speech_df %>% 
   dplyr::rename(CodigoPronunciamento = docvar1, Pronunciamento = text) %>% 
   select(CodigoPronunciamento, Pronunciamento)
 
 # Save
-save(speeches_df, file = "speeches_df.Rda")
+save(speech_df, file = "speech_df.Rda")
 ```
 
 
 Merge the two data frames and remove empty rows. Here we go from 17544 observations to 15588 because 1956 of the speech files downloaded were empty. 
 
 ```{r}
-# Merge `sen_df` and `speeches_df` and omit empty rows
-sen_corpus_df <- merge(sen_df, speeches_df, by = "CodigoPronunciamento") %>% 
+# Merge `sen_df` and `speech_df` and omit empty rows
+sen_corpus_df <- merge(sen_df, speech_df, by = "CodigoPronunciamento") %>% 
   na_if("") %>%
   na.omit 
 
 # Save corpus data frame
 save(speech_df, file = "speech_df.Rda")
 ```
-
-```{r}
-# Import lemmatized speeches (from python-spacy)
-senado1 <- read_csv("C:/Users/carol/Desktop/senado1.csv")
-
-# Change columns names and select
-sen_corpus_lemma <- senado1
-sen_corpus_lemma  <- sen_corpus_lemma %>% 
-  rename(PronunciamentoLemma = clean) %>% 
-  select(CodigoPronunciamento, PronunciamentoLemma)
-
-# Merge with complete data frame 
-sen_corpus_lemma <- merge(sen_corpus_df, sen_corpus_lemma, by = "CodigoPronunciamento")
-
-# Select columns and save corpus_lemma data frame
-sen_corpus_lemma <- sen_corpus_lemma[c(-8)]
-save(sen_corpus_lemma, file = "sen_corpus_lemma.Rda")
-```
-
 
 # Executive
 
@@ -151,7 +133,7 @@ spill_texts <- readtext(pdfs,
 
 ```
 
-Add party variable and coallitions
+Add party variable and coalitions
 
 ```{r}
 pres_df <- spill_texts %>% 
