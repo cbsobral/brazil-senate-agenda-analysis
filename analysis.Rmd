@@ -1,15 +1,13 @@
 ---
-title: "Brazilian Senate Parties and Bolsonaro's political agenda (2019-2020)"
-subtitle: "TADA Final Project Report"
-author: Ana Benevides, Carol Sobral, Stefania Molina
-date: "`r Sys.Date()`" 
+title: "Brazilian Senate Parties and Bolsonaro's Political Agenda (2019-2020)"
+subtitle: 'TADA Final Project Report'
+author: 'Ana Benevides, Carol Sobral, Stefania Molina'
+date: '`r Sys.Date()`'
 abstract: |
-  In this study, we examine the collection of speeches made in the Brazilian Senate in the period of 2019-2020 to assess how three dimensions of Bolsonaro’s political agenda resonate within the discussions being held in the Senate House. We start by exploring the composition of the Brazilian Senate, and we find that speech distribution is not evenly balanced, but disproportionally represent male speeches, and coming from a few states and with a predominance of parties from the left. 
-  Turning to scaling, we compare party ideologies in the Right-Left scale based on Senate’s speeches with an assessment made by the Brazilian press. Then we compare party positions using the manifestos from the 2018 presidential elections.
-  Finally, in assessing the three dimensions of Bolsonaro’s agenda, we conclude that economic discussions seem more polarized, with a distinct preference for certain words and topics, depending on RILE position. Discussions based on security and gender & family are less prevalent in the corpus, and do not suggest a strong differentiation in the vocabulary employed.
-output: 
+  In this study, we examine the collection of speeches made in the Brazilian Senate in the period of 2019-2020 to assess how three dimensions of Bolsonaro’s political agenda resonate within the discussions being held in the Senate House. We start by exploring the composition of the Brazilian Senate, in terms of party, state of origin, and gender. Turning to scaling, we compare party ideologies in the Right-Left scale based on Senate’s speeches with an assessment made by the Brazilian press. Then we estimate party positions using the manifestos from the 2018 presidential elections.Finally, in assessing the three dimensions of Bolsonaro’s agenda, we conclude that economic discussions seem more polarized, with a distinct preference for certain words and topics, depending on RILE position. Discussions based on security and gender & family are less prevalent in the corpus and do not suggest a strong differentiation in the vocabulary employed.
+output:
   html_document:
-    code_folding: hide 
+    code_folding: hide
     toc: yes
     theme: paper
     toc_float:
@@ -117,8 +115,7 @@ merge(expected, observed, by = 'Gender') %>%
   mutate(across(is.numeric, ~ round(., 2))) %>% 
   ggplot(aes(Value, Proportion, group = Gender, fill = Gender)) +
   geom_col(position = 'dodge') + 
-  geom_text(aes(label = Value), position = position_dodge(0.9), 
-            show.legend = FALSE, vjust = -0.5) +
+  geom_text(aes(label = Value), position = position_dodge(0.9), show.legend = FALSE, vjust = -0.5) +
   coord_flip() +
   theme_minimal()
 ```
@@ -179,13 +176,13 @@ merge(n_speeches, n_senators, by = 'Partido') %>%
   ggplot(aes(Partido, diff, label = diff, fill = ifelse(diff < 0, '#00BFC4', '#F8766D'))) +
   geom_col() +
   geom_text(aes(y = diff + 2 * sign(diff), label = diff), position = position_dodge(width = 0.9)) +
-  ylab('Percentage difference to expected Speeches') +
+  ylab('Percentage Difference to Expected Speeches') +
   xlab('Party') +
   theme_classic() +
   theme(axis.text.x = element_text(angle = 90), legend.position = 'none') 
 ```
 
-One final thing needs to be mentioned about Brazilian politics current state of affairs. In recent years, politicians in Brazil have often changed parties. This happens mostly out of ideological differences and conflicts with party leadership. In fact, Bolsonaro has been partyless ("S/ Partido") for over a year.
+One final thing needs to be mentioned about Brazilian politics current state of affairs. In recent years, politicians in Brazil have often changed parties. This happens mostly out of ideological differences and conflicts with party leadership. In fact, Bolsonaro has been partyless ('S/ Partido') for over a year.
 
 The lack of party loyalty and identification that is currently a trend in the Brazilian political context might render any study that attempts to draw an inference about party positions from politicians' speeches susceptible to criticism. Katia Abreu, for instance, has been associated with 3 different parties in the period of 2019-2020, and has also been partyless for a while. In order to assess the degree to which this study is vulnerable to this criticism, we listed bellow the changes in party affiliation that affect our corpus.
 
@@ -370,7 +367,7 @@ speech_df %>%
 
 ### 2018's Presidential Manifestos {.tabset}
 
-In this section, we use Austin to estimate party positions from presidential manifestos for the 2018 election.
+In this section, we use *Austin* to estimate party positions from presidential manifestos for the 2018 election.
 
 ```{r Presidential_Campaign}
 # Corpus presidential speeches
@@ -393,7 +390,7 @@ dfmat_pres <- dfm_select(dfmat_pres, min_nchar = 2)
 
 #### Austin Prediction
 
-The graph illustrates party positions derived with Austin from the presidential manifestos (y-axis) and positions for Senate speeches (x-axis) derived from an out-of-sample prediction. Parties have more extreme positions based on presidential manifestos. This might suggest that when running presidential elections, parties adopt in their manifestos more clear-cut positions, as they are catering to their preferred constituency. In everyday discussions in the Senate, however, positions seem to be more fluid, and less extreme - something also evidenced by the aforementioned lack of party loyalty/identification coming from at least 23% of the senators.
+The graph illustrates party positions derived with *Austin* from the presidential manifestos (y-axis) and positions for Senate speeches (x-axis) derived from an out-of-sample prediction. Parties have more extreme positions based on presidential manifestos. This might suggest that when running presidential elections, parties adopt in their manifestos more clear-cut positions, as they are catering to their preferred constituency. In everyday discussions in the Senate, however, positions seem to be more fluid, and less extreme - something also evidenced by the aforementioned lack of party loyalty/identification coming from at least 23% of the senators.
 
 ```{r message=FALSE, warning=FALSE}
 # Austin
@@ -441,7 +438,7 @@ theta_ps %>%
 
 #### Austin vs. Wordfish
 
-The graph shows party positions derived from Senate speeches. The y-axis contains values from Austin's out-of-sample prediction from presidential manifestos and the x-axis contains *Wordfish* values. We see that *Austin* predictions are more centered, while *Wordfish* are more polarized. 
+The graph shows party positions derived from Senate speeches. The y-axis contains values from *Austin's* out-of-sample prediction from presidential manifestos and the x-axis contains *Wordfish* values. We see that *Austin* predictions are more centered, while *Wordfish* are more polarized. 
 
 ```{r}
 # Compare wf_sen x out of sample Austin prediction to senate speeches
